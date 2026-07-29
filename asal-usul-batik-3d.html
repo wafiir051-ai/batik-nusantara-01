@@ -551,14 +551,18 @@ function startMusic() {
 let voice = null;
 function pickVoice() {
   const vs = speechSynthesis.getVoices();
+  // prefer Indonesian local voices first, then Malay as fallback
   const pool = vs.filter(v => v.lang && v.lang.toLowerCase().startsWith('id'));
   const fallback = vs.filter(v => v.lang && v.lang.toLowerCase().startsWith('ms'));
+  // scoring: prefer local (installed) voices — these usually sound more natural
   const score = v =>
-    (/natural|neural|online/i.test(v.name) ? 8 : 0) +
-    (/google/i.test(v.name) ? 5 : 0) +
+    (v.localService ? 8 : 0) +
     (/ardi|gadis|damayanti|andika/i.test(v.name) ? 3 : 0) +
-    (v.localService ? 0 : 1);
+    (/natural|neural/i.test(v.name) ? 2 : 0) +
+    (/google/i.test(v.name) ? -1 : 0);
   voice = pool.sort((a, b) => score(b) - score(a))[0] || fallback.sort((a, b) => score(b) - score(a))[0] || null;
+  // debug to help identify which voice the browser chose
+  try { console.info('pickVoice -> chosen:', voice && voice.name, voice && voice.lang, 'localService=', voice && voice.localService); } catch (e) {}
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 let speakSession = 0, pendingNext = null, narrActive = false;
@@ -577,8 +581,9 @@ function speak(text) {
     const u = new SpeechSynthesisUtterance(sentences[i].trim());
     if (voice) u.voice = voice;
     u.lang = 'id-ID';
-    u.rate = 0.93 + (i % 3) * 0.02; // variasi tempo tipis agar tak monoton
-    u.pitch = 1.02;
+    u.rate = 0.95 + (i % 3) * 0.01; // sedikit variasi tempo
+    u.pitch = 1.0;
+    u.volume = 1.0;
     i++;
     u.onend = () => setTimeout(next, i % 4 === 0 ? 420 : 240); // jeda napas
     speechSynthesis.speak(u);
