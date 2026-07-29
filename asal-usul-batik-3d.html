@@ -595,14 +595,16 @@ function speakTTS(text) {
 // --- audio file playback (preferred if MP3 exists)
 let audioPlayer = null;
 function playAudioForChapter(i, onended) {
-  // expected path: uploads/asal-usul-<n>.mp3 (1-based index)
-  const url = `uploads/asal-usul-${i+1}.mp3`;
+  // try multiple extensions (mp3 first, then m4a)
+  const exts = ['mp3', 'm4a'];
+  let attempt = 0;
+  let url = `uploads/asal-usul-${i+1}.${exts[attempt]}`;
   // cleanup any previous player
   if (audioPlayer) {
     try { audioPlayer.pause(); audioPlayer.src = ''; } catch (e) {}
     audioPlayer = null;
   }
-  // try to play audio; if it errors, fallback to TTS
+  // try to play audio; if it errors, try next extension, finally fallback to TTS
   audioPlayer = new Audio(url);
   audioPlayer.preload = 'auto';
   audioPlayer.crossOrigin = 'anonymous';
@@ -614,12 +616,25 @@ function playAudioForChapter(i, onended) {
     narrActive = true;
     capEl.textContent = CHAPTERS[i].cap || '';
     audioPlayer.play().catch(() => { // play failed -> fallback
-      tidy(); audioPlayer = null; playNarrationTTS(i);
+      tidy(); audioPlayer = null;
+      // try next extension
+      attempt++;
+      if (attempt < exts.length) {
+        playAudioForChapter(i, onended);
+      } else {
+        playNarrationTTS(i);
+      }
     });
     played = true;
   };
   audioPlayer.onerror = () => {
-    tidy(); audioPlayer = null; playNarrationTTS(i);
+    tidy(); audioPlayer = null;
+    attempt++;
+    if (attempt < exts.length) {
+      playAudioForChapter(i, onended);
+    } else {
+      playNarrationTTS(i);
+    }
   };
   audioPlayer.onended = () => {
     narrActive = false;
