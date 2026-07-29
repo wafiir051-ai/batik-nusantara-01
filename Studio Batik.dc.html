@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #F5EFE2; }
+  body { font-family: 'Alegreya Sans', sans-serif; color: #2B2118; }
+  a { color: #44507E; text-decoration: none; } a:hover { color: #7A5427; }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #F5EFE2;" data-screen-label="Studio Batik">
+  <header style="border-bottom: 1px solid #DCCEAC; background: rgba(245,239,226,0.92);">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: baseline; gap: 18px; flex-wrap: wrap;">
+      <div style="font-family: Marcellus, serif; font-size: 24px;">Studio Batik</div>
+      <div style="font-size: 14px; color: #6B5B42;">{{ L.sub }}</div>
+      <a href="Batik Nusantara.dc.html" style="margin-left: auto; font-size: 14px; font-weight: 700;">{{ L.back }}</a>
+    </div>
+  </header>
+  <main style="max-width: 1240px; margin: 0 auto; padding: 24px 24px 56px; display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+    <div style="flex: 1 1 480px; min-width: 300px;">
+      <div style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 10px; padding: 14px; box-shadow: 0 14px 32px rgba(43,33,24,0.08);">
+        <canvas ref="{{ canvasRef }}" width="840" height="560"
+          onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerLeave="{{ onUp }}"
+          style="width: 100%; display: block; border: 1px solid #C9B685; border-radius: 4px; cursor: crosshair; touch-action: none; background: #EAD9B6;"></canvas>
+        <div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; font-size: 13px; color: #8A7657;">
+          <span>{{ hint }}</span>
+          <span>{{ cellInfo }}</span>
+        </div>
+      </div>
+    </div>
+    <aside style="flex: 0 0 300px; min-width: 270px; display: flex; flex-direction: column; gap: 14px;">
+      <section style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 10px; padding: 16px 18px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A7657; font-weight: 700; margin-bottom: 10px;">{{ L.mode }}</div>
+        <div style="display: flex; gap: 6px;">
+          <sc-for list="{{ modes }}" as="m" hint-placeholder-count="3">
+            <button onClick="{{ m.go }}" style="{{ m.style }}">{{ m.label }}</button>
+          </sc-for>
+        </div>
+      </section>
+      <section style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 10px; padding: 16px 18px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A7657; font-weight: 700; margin-bottom: 10px;">{{ L.motif }}</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+          <sc-for list="{{ motifChips }}" as="mc" hint-placeholder-count="6">
+            <button onClick="{{ mc.go }}" style="{{ mc.style }}">
+              <span style="{{ mc.preview }}"></span>
+              <span style="font-size: 12.5px;">{{ mc.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+      <section style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 10px; padding: 16px 18px;">
+        <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A7657; font-weight: 700; margin-bottom: 10px;">{{ L.warnaKain }}</div>
+        <div style="display: flex; gap: 10px;">
+          <sc-for list="{{ baseChips }}" as="bc" hint-placeholder-count="4">
+            <button onClick="{{ bc.go }}" title="{{ bc.name }}" style="{{ bc.style }}"></button>
+          </sc-for>
+        </div>
+        <div style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: #8A7657; font-weight: 700; margin: 16px 0 10px; border-top: 1px solid #EDE3CC; padding-top: 14px;">{{ L.warnaMotif }}</div>
+        <div style="display: flex; gap: 10px;">
+          <sc-for list="{{ fgChips }}" as="fc" hint-placeholder-count="5">
+            <button onClick="{{ fc.go }}" title="{{ fc.name }}" style="{{ fc.style }}"></button>
+          </sc-for>
+        </div>
+      </section>
+      <section style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; gap: 10px;">
+          <button onClick="{{ undo }}" style="flex: 1; background: transparent; border: 1px solid #B99C5E; border-radius: 4px; padding: 10px; font-family: 'Alegreya Sans', sans-serif; font-size: 14px; font-weight: 700; color: #2B2118; cursor: pointer;" style-hover="background: #EDE3CC;">{{ L.undo }}</button>
+          <button onClick="{{ clearAll }}" style="flex: 1; background: transparent; border: 1px solid #B99C5E; border-radius: 4px; padding: 10px; font-family: 'Alegreya Sans', sans-serif; font-size: 14px; font-weight: 700; color: #A34A3F; cursor: pointer;" style-hover="background: #F3E2DC;">{{ L.clear }}</button>
+        </div>
+        <button onClick="{{ download }}" style="background: #44507E; color: #F6F0E2; border: none; border-radius: 4px; padding: 13px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer;" style-hover="background: #37416A;">{{ L.download }}</button>
+        <button onClick="{{ to3d }}" style="background: transparent; color: #44507E; border: 1px solid #44507E; border-radius: 4px; padding: 12px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer;" style-hover="background: #E6E9F2;">{{ L.see3d }}</button>
+      </section>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { mode: 'cap', motif: 'kawung', fg: '#6B4A1F', base: '#EAD9B6', ops: 0 };
+  canvasRef = React.createRef();
+  ops = [];        // [{t:'cell',i,j,motif,fg}, {t:'stroke',pts:[[x,y]..],fg}]
+  drawing = false;
+  CW = 840; CH = 560; CS = 56; // cell size -> 15 x 10 grid
+
+  componentDidMount() { this.paint(); }
+  componentDidUpdate() { this.paint(); }
+
+  // ---------- motif renderers (geometric, stylized) ----------
+  drawMotif(g, m, x, y, s, fg) {
+    g.save(); g.beginPath(); g.rect(x, y, s, s); g.clip();
+    g.strokeStyle = fg; g.fillStyle = fg;
+    if (m === 'parang') {
+      g.lineWidth = s / 9;
+      for (let i = -s; i <= s * 2; i += s / 3.2) {
+        g.beginPath(); g.moveTo(x + i, y + s); g.lineTo(x + i + s, y); g.stroke();
+      }
+    } else if (m === 'kawung') {
+      const r = s * 0.19;
+      for (const [dx, dy, rot] of [[0.5, 0.18, 0], [0.5, 0.82, 0], [0.18, 0.5, 1], [0.82, 0.5, 1]]) {
+        g.beginPath();
+        g.ellipse(x + dx * s, y + dy * s, rot ? r : r * 0.62, rot ? r * 0.62 : r, 0, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.beginPath(); g.arc(x + s / 2, y + s / 2, s * 0.05, 0, Math.PI * 2); g.fill();
+    } else if (m === 'truntum') {
+      for (const [dx, dy] of [[0.5, 0.5], [0.2, 0.2], [0.8, 0.2], [0.2, 0.8], [0.8, 0.8]]) {
+        const r = dx === 0.5 ? s * 0.09 : s * 0.055;
+        g.beginPath(); g.arc(x + dx * s, y + dy * s, r, 0, Math.PI * 2); g.fill();
+      }
+    } else if (m === 'mega') {
+      g.lineWidth = s / 10;
+      for (let r = s * 0.22; r <= s * 0.75; r += s * 0.24) {
+        g.beginPath(); g.arc(x + s / 2, y + s * 1.05, r, Math.PI, Math.PI * 2); g.stroke();
+      }
+    } else if (m === 'nitik') {
+      g.lineWidth = s / 12;
+      g.beginPath();
+      g.moveTo(x + s / 2, y + s * 0.12); g.lineTo(x + s * 0.88, y + s / 2);
+      g.lineTo(x + s / 2, y + s * 0.88); g.lineTo(x + s * 0.12, y + s / 2);
+      g.closePath(); g.stroke();
+      g.beginPath(); g.arc(x + s / 2, y + s / 2, s * 0.07, 0, Math.PI * 2); g.fill();
+    } else if (m === 'ceplok') {
+      g.lineWidth = s / 12;
+      g.strokeRect(x + s * 0.14, y + s * 0.14, s * 0.72, s * 0.72);
+      g.beginPath(); g.arc(x + s / 2, y + s / 2, s * 0.2, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.arc(x + s / 2, y + s / 2, s * 0.06, 0, Math.PI * 2); g.fill();
+    }
+    g.restore();
+  }
+
+  paint() {
+    const cv = this.canvasRef.current; if (!cv) return;
+    const g = cv.getContext('2d');
+    g.fillStyle = this.state.base; g.fillRect(0, 0, this.CW, this.CH);
+    // faint grid guides
+    g.strokeStyle = 'rgba(43,33,24,0.045)'; g.lineWidth = 1;
+    for (let x = this.CS; x < this.CW; x += this.CS) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, this.CH); g.stroke(); }
+    for (let y = this.CS; y < this.CH; y += this.CS) { g.beginPath(); g.moveTo(0, y); g.lineTo(this.CW, y); g.stroke(); }
+    for (const op of this.ops) {
+      if (op.t === 'cell') this.drawMotif(g, op.motif, op.i * this.CS, op.j * this.CS, this.CS, op.fg);
+      else if (op.t === 'erase') { g.fillStyle = this.state.base; g.fillRect(op.i * this.CS + 0.5, op.j * this.CS + 0.5, this.CS - 1, this.CS - 1); }
+      else if (op.t === 'stroke' && op.pts.length > 1) {
+        g.strokeStyle = op.fg; g.lineWidth = 7; g.lineCap = 'round'; g.lineJoin = 'round';
+        g.beginPath(); g.moveTo(op.pts[0][0], op.pts[0][1]);
+        for (const [px, py] of op.pts) g.lineTo(px, py);
+        g.stroke();
+      }
+    }
+    // selvedge border: slim double line
+    g.strokeStyle = '#7A5427'; g.lineWidth = 4; g.strokeRect(6, 6, this.CW - 12, this.CH - 12);
+    g.lineWidth = 1; g.strokeRect(14.5, 14.5, this.CW - 29, this.CH - 29);
+  }
+
+  xy(e) {
+    const cv = this.canvasRef.current, r = cv.getBoundingClientRect();
+    return [(e.clientX - r.left) * (this.CW / r.width), (e.clientY - r.top) * (this.CH / r.height)];
+  }
+  applyAt(x, y) {
+    const { mode, motif, fg } = this.state;
+    if (mode === 'canting') {
+      this.ops[this.ops.length - 1].pts.push([x, y]);
+    } else {
+      const i = Math.floor(x / this.CS), j = Math.floor(y / this.CS);
+      const last = this.ops[this.ops.length - 1];
+      if (last && last.i === i && last.j === j && last.t !== 'stroke') return;
+      this.ops.push(mode === 'hapus' ? { t: 'erase', i, j } : { t: 'cell', i, j, motif, fg });
+    }
+    this.paint();
+  }
+  down(e) {
+    e.target.setPointerCapture && e.target.setPointerCapture(e.pointerId);
+    this.drawing = true;
+    if (this.state.mode === 'canting') this.ops.push({ t: 'stroke', pts: [], fg: this.state.fg });
+    const [x, y] = this.xy(e); this.applyAt(x, y);
+  }
+  move(e) { if (this.drawing) { const [x, y] = this.xy(e); this.applyAt(x, y); } }
+  up() { if (this.drawing) { this.drawing = false; this.setState({ ops: this.ops.length }); } }
+
+  renderVals() {
+    const L = {
+      sub: 'Rancang motif batikmu sendiri', back: '\u2190 Kembali ke website',
+      mode: 'Alat', motif: 'Motif Cap', warnaKain: 'Warna Kain', warnaMotif: 'Warna Motif',
+      undo: 'Urungkan', clear: 'Bersihkan', download: 'Unduh Desain (PNG)', see3d: 'Lihat di Kain 3D \u2192'
+    };
+    const chipBase = { flex: 1, border: '1px solid #C9B685', background: '#FBF6E9', color: '#5C4E3B', borderRadius: '6px', padding: '8px 6px', fontSize: '13px', fontFamily: "'Alegreya Sans', sans-serif", cursor: 'pointer', fontWeight: 700, whiteSpace: 'nowrap' };
+    const chipOn = { ...chipBase, background: '#44507E', borderColor: '#44507E', color: '#F6F0E2' };
+    const { mode, motif, fg, base } = this.state;
+    const modes = [['cap', 'Cap Motif'], ['canting', 'Canting Bebas'], ['hapus', 'Hapus']].map(([k, label]) => ({
+      label, go: () => this.setState({ mode: k }), style: mode === k ? chipOn : chipBase
+    }));
+    const PREV = {
+      parang: 'repeating-linear-gradient(45deg, #6B4A1F 0 3px, transparent 3px 9px)',
+      kawung: 'radial-gradient(circle at 30% 30%, #6B4A1F 0 4px, transparent 5px), radial-gradient(circle at 70% 70%, #6B4A1F 0 4px, transparent 5px)',
+      truntum: 'radial-gradient(circle, #6B4A1F 0 2px, transparent 3px)',
+      mega: 'repeating-radial-gradient(circle at 50% 120%, #6B4A1F 0 3px, transparent 3px 8px)',
+      nitik: 'linear-gradient(45deg, #6B4A1F 25%, transparent 25% 75%, #6B4A1F 75%)',
+      ceplok: 'radial-gradient(circle, transparent 0 5px, #6B4A1F 5px 7px, transparent 7px)'
+    };
+    const motifChips = [['kawung', 'Kawung'], ['parang', 'Parang'], ['mega', 'Mega Mendung'], ['truntum', 'Truntum'], ['nitik', 'Nitik'], ['ceplok', 'Ceplok']].map(([k, label]) => ({
+      label,
+      go: () => this.setState({ motif: k, mode: 'cap' }),
+      style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', padding: '9px 4px', borderRadius: '8px', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", background: motif === k ? '#EADFC4' : 'transparent', border: motif === k ? '1px solid #7A5427' : '1px solid #E2D5B4', color: '#2B2118', transition: 'background 0.2s, border-color 0.2s' },
+      preview: { width: '34px', height: '34px', borderRadius: '6px', backgroundColor: '#EAD9B6', backgroundImage: PREV[k], backgroundSize: k === 'truntum' ? '10px 10px' : k === 'nitik' ? '14px 14px' : k === 'ceplok' ? '16px 16px' : 'auto', border: '1px solid #C9B685' }
+    }));
+    const sw = (c, on) => ({ width: '32px', height: '32px', borderRadius: '50%', background: c, cursor: 'pointer', border: '1px solid #C9B685', boxShadow: on ? '0 0 0 2px #FDFAF1, 0 0 0 4px #44507E' : 'none', transition: 'box-shadow 0.15s' });
+    const BASES = [['#EAD9B6', 'Krem sogan'], ['#D8DCEA', 'Biru pucat'], ['#F1DFD2', 'Pesisir'], ['#2B2118', 'Hitam manis']];
+    const FGS = [['#6B4A1F', 'Cokelat soga'], ['#3D4870', 'Indigo'], ['#A34A3F', 'Merah mengkudu'], ['#B99C5E', 'Emas'], ['#F5EFE2', 'Putih malam']];
+    const baseChips = BASES.map(([c, name]) => ({ name, go: () => this.setState({ base: c }), style: sw(c, base === c) }));
+    const fgChips = FGS.map(([c, name]) => ({ name, go: () => this.setState({ fg: c }), style: sw(c, fg === c) }));
+    const hints = { cap: 'Klik / seret pada kanvas untuk mencap motif.', canting: 'Gambar bebas seperti mencanting malam.', hapus: 'Klik sel untuk menghapusnya.' };
+    return {
+      L, modes, motifChips, baseChips, fgChips,
+      canvasRef: this.canvasRef,
+      hint: hints[mode],
+      cellInfo: this.ops.length + ' goresan',
+      onDown: (e) => this.down(e), onMove: (e) => this.move(e), onUp: () => this.up(),
+      undo: () => { this.ops.pop(); this.setState({ ops: this.ops.length }); },
+      clearAll: () => { this.ops = []; this.setState({ ops: 0 }); },
+      download: () => {
+        const a = document.createElement('a');
+        a.download = 'batik-karyaku.png';
+        a.href = this.canvasRef.current.toDataURL('image/png');
+        a.click();
+      },
+      to3d: () => {
+        try { localStorage.setItem('batikCustomTexture', this.canvasRef.current.toDataURL('image/png')); } catch (err) {}
+        window.location.href = 'animasi-3d.html?custom=1';
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

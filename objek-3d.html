@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Canting & Kain Batik — Objek 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:wght@400;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js",
+    "three/addons/controls/OrbitControls.js": "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js",
+    "three/addons/exporters/OBJExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js",
+    "three/addons/exporters/GLTFExporter.js": "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT",
+    "https://unpkg.com/three@0.184.0/examples/jsm/controls/OrbitControls.js": "sha384-4rziNxOBZKQ69i+w+f89KJ55TCYquwchVbByQwmaOeIOXdOU2PLDn3kOfXHwIJC9",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/OBJExporter.js": "sha384-nbwtoZENJD3Vq+ACK0CuGQdPMuDWHkamC2KJD70EV5nfg6jQjfppKOea07YJN+N3",
+    "https://unpkg.com/three@0.184.0/examples/jsm/exporters/GLTFExporter.js": "sha384-VofkvpG6HERhFCYbsUOHeNXBCqID2nfqkQqnVzE1jc/oPcz+qJ13ADdXH08hE+cQ"
+  }
+}
+</script>
+<style>
+  html, body { margin: 0; height: 100%; }
+  three-d-stage:not(:defined) { visibility: hidden; }
+  .overlay {
+    position: fixed; top: 20px; left: 24px; z-index: 10; pointer-events: none;
+    font-family: 'Alegreya Sans', sans-serif; color: #2B2118;
+  }
+  .overlay h1 { font-family: Marcellus, serif; font-size: 24px; font-weight: 400; margin: 0; }
+  .overlay p { margin: 4px 0 0; font-size: 13.5px; color: #6B5B42; }
+  .overlay a { pointer-events: auto; color: #44507E; font-weight: 700; text-decoration: none; }
+  .overlay a:hover { color: #7A5427; }
+</style>
+</head>
+<body>
+<div class="overlay">
+  <h1>Canting &amp; Kain Batik</h1>
+  <p>Seret untuk memutar · gulir untuk zoom · <a href="Batik Nusantara.dc.html">&larr; kembali ke website</a></p>
+</div>
+<three-d-stage name="canting-batik" background="#F5EFE2" autorotate></three-d-stage>
+<script src="three-d-stage.js"></script>
+<script type="module">
+const stage = document.querySelector('three-d-stage');
+const { THREE } = await stage.ready;
+
+const mat = {
+  kayu:    new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.7,  metalness: 0.05 }),
+  tembaga: new THREE.MeshStandardMaterial({ color: 0xc47f35, roughness: 0.35, metalness: 0.35 }),
+  kainKrem:new THREE.MeshStandardMaterial({ color: 0xead9b6, roughness: 0.95, metalness: 0 }),
+  kainSoga:new THREE.MeshStandardMaterial({ color: 0x6b4a1f, roughness: 0.95, metalness: 0 }),
+  kainIndigo: new THREE.MeshStandardMaterial({ color: 0x44507e, roughness: 0.95, metalness: 0 }),
+  malam:   new THREE.MeshStandardMaterial({ color: 0x3d2e19, roughness: 0.5,  metalness: 0.1 })
+};
+Object.entries(mat).forEach(([k, m]) => (m.name = k));
+
+const model = new THREE.Group();
+model.name = 'canting_batik';
+
+// ── folded batik cloth: three stacked layers, slightly rotated ──
+function clothLayer(name, w, d, y, rot, material) {
+  const g = new THREE.BoxGeometry(w, 0.012, d);
+  const mesh = new THREE.Mesh(g, material);
+  mesh.name = name;
+  mesh.position.y = y;
+  mesh.rotation.y = rot;
+  model.add(mesh);
+  return mesh;
+}
+clothLayer('kain_lapis_bawah', 0.42, 0.30, 0.006, -0.06, mat.kainIndigo);
+clothLayer('kain_lapis_tengah', 0.38, 0.27, 0.019, 0.05, mat.kainSoga);
+const top = clothLayer('kain_lapis_atas', 0.34, 0.24, 0.032, -0.02, mat.kainKrem);
+
+// stylized kawung dots on the top layer (exports as real geometry)
+const dotGeo = new THREE.CylinderGeometry(0.011, 0.011, 0.004, 24);
+for (let i = 0; i < 7; i++) {
+  for (let j = 0; j < 5; j++) {
+    const dot = new THREE.Mesh(dotGeo, (i + j) % 2 ? mat.kainSoga : mat.kainIndigo);
+    dot.name = `motif_titik_${i}_${j}`;
+    dot.position.set(-0.135 + i * 0.045, 0.04, -0.09 + j * 0.045);
+    dot.rotation.y = -0.02;
+    top.add(new THREE.Object3D());
+    model.add(dot);
+  }
+}
+
+// ── canting resting diagonally on the cloth ──
+const canting = new THREE.Group();
+canting.name = 'canting';
+
+const gagang = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.0105, 0.16, 32), mat.kayu);
+gagang.name = 'gagang_kayu';
+gagang.rotation.z = Math.PI / 2;
+gagang.position.set(-0.085, 0, 0);
+canting.add(gagang);
+
+// nyamplung (wax reservoir) — squat lathe bowl with lid curve
+const pts = [];
+for (let i = 0; i <= 10; i++) {
+  const t = i / 10;
+  pts.push(new THREE.Vector2(0.001 + Math.sin(t * Math.PI) * 0.022, t * 0.026));
+}
+const nyamplung = new THREE.Mesh(new THREE.LatheGeometry(pts, 40), mat.tembaga);
+nyamplung.name = 'nyamplung_tembaga';
+nyamplung.position.set(0.012, -0.013, 0);
+canting.add(nyamplung);
+
+const cucuk = new THREE.Mesh(new THREE.CylinderGeometry(0.0022, 0.0035, 0.045, 20), mat.tembaga);
+cucuk.name = 'cucuk_tembaga';
+cucuk.rotation.z = 1.15;
+cucuk.position.set(0.048, -0.004, 0);
+canting.add(cucuk);
+
+canting.rotation.set(0, 0.5, 0.12);
+canting.position.set(0.04, 0.055, 0.01);
+model.add(canting);
+
+// ── small wax bowl beside the cloth ──
+const wadahPts = [];
+for (let i = 0; i <= 12; i++) {
+  const t = i / 12;
+  wadahPts.push(new THREE.Vector2(0.012 + Math.sin(t * Math.PI * 0.62) * 0.05, t * 0.05));
+}
+const wadah = new THREE.Mesh(new THREE.LatheGeometry(wadahPts, 44), mat.tembaga);
+wadah.name = 'wadah_malam';
+wadah.position.set(0.3, 0, -0.05);
+model.add(wadah);
+
+const malam = new THREE.Mesh(new THREE.CylinderGeometry(0.044, 0.044, 0.006, 40), mat.malam);
+malam.name = 'malam_lilin';
+malam.position.set(0.3, 0.042, -0.05);
+model.add(malam);
+
+stage.setObject(model);
+</script>
+</body>
+</html>

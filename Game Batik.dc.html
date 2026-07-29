@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #2B2118; }
+  body { font-family: 'Alegreya Sans', sans-serif; color: #2B2118; -webkit-font-smoothing: antialiased; }
+  a { color: #44507E; text-decoration: none; }
+  a:hover { color: #7A5427; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes shakeX { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  @keyframes popIn { 0% { transform: scale(0.6); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+</style>
+</helmet>
+<div style="min-height: 100vh; background: #2B2118; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+  <div style="position: absolute; inset: 0; opacity: 0.08; background-image: radial-gradient(circle at 25% 25%, #B99C5E 0 7px, transparent 8px), radial-gradient(circle at 75% 75%, #B99C5E 0 7px, transparent 8px); background-size: 44px 44px;"></div>
+
+  <header style="position: relative; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 16px 26px; border-bottom: 1px solid rgba(185,156,94,0.35);">
+    <div style="width: 36px; height: 36px; border-radius: 4px; border: 1px solid #B99C5E; background-color: #EAD9B6; background-image: radial-gradient(circle at 25% 25%, #6B4A1F 0 4px, transparent 5px), radial-gradient(circle at 75% 75%, #6B4A1F 0 4px, transparent 5px); background-size: 22px 22px;"></div>
+    <div>
+      <div style="font-family: Marcellus, serif; font-size: 19px; color: #F2E9D5;">{{ L.title }}</div>
+      <div style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #B99C5E;">Batik Nusantara</div>
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 14px;">
+      <div style="display: flex; border: 1px solid #B99C5E; border-radius: 999px; overflow: hidden;">
+        <button onClick="{{ setId }}" style="{{ idBtnStyle }}">ID</button>
+        <button onClick="{{ setEn }}" style="{{ enBtnStyle }}">EN</button>
+      </div>
+      <a href="Batik Nusantara.dc.html" style="font-size: 14px; font-weight: 700; color: #F2E9D5; border: 1px solid rgba(185,156,94,0.6); padding: 8px 18px; border-radius: 999px;" style-hover="background: #B99C5E; color: #2B2118;">&larr; {{ L.back }}</a>
+    </div>
+  </header>
+
+  <div style="position: relative; z-index: 5; display: flex; gap: 8px; justify-content: center; padding: 18px 24px 0;">
+    <sc-for list="{{ dots }}" as="d" hint-placeholder-count="6">
+      <div style="{{ d.style }}" title="{{ d.label }}"></div>
+    </sc-for>
+  </div>
+
+  <main style="position: relative; z-index: 5; flex: 1; display: grid; place-items: center; padding: 22px 24px 40px;">
+
+    <sc-if value="{{ showStart }}" hint-placeholder-val="{{ true }}">
+      <div data-screen-label="Game Start" style="text-align: center; max-width: 620px; animation: cardIn 0.5s ease-out both;">
+        <div style="font-size: 13px; letter-spacing: 0.28em; text-transform: uppercase; color: #B99C5E; font-weight: 700;">{{ L.kicker }}</div>
+        <h1 style="font-family: Marcellus, serif; font-size: clamp(38px, 5.5vw, 60px); color: #F2E9D5; font-weight: 400; line-height: 1.1; margin: 16px 0 0;">{{ L.startTitle }}</h1>
+        <p style="color: #C9B99A; font-size: 17.5px; line-height: 1.65; margin: 18px auto 0; max-width: 480px; text-wrap: pretty;">{{ L.startLede }}</p>
+        <button onClick="{{ start }}" style="margin-top: 32px; background: #B99C5E; color: #2B2118; border: none; padding: 15px 40px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.05em; cursor: pointer;" style-hover="background: #CBB077;">{{ L.startCta }}</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showStory }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Game Story" style="max-width: 640px; width: 100%; background: #F5EFE2; border-radius: 10px; padding: 34px 38px 30px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); animation: cardIn 0.45s ease-out both;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; border: 1px solid #B99C5E; background: #EAD9B6; display: grid; place-items: center; font-family: Marcellus, serif; font-size: 17px; color: #7A5427;">{{ levelNo }}</div>
+          <div>
+            <div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #7A5427; font-weight: 800;">{{ L.chapter }} {{ levelNo }} / 6</div>
+            <div style="font-family: Marcellus, serif; font-size: 24px;">{{ storyTitle }}</div>
+          </div>
+        </div>
+        <p style="font-size: 16.5px; line-height: 1.7; color: #4A3E2E; margin: 20px 0 0; text-wrap: pretty;">{{ storyText }}</p>
+        <div style="display: flex; justify-content: flex-end; margin-top: 26px;">
+          <button onClick="{{ toQuiz }}" style="background: #44507E; color: #F6F0E2; border: none; padding: 12px 30px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer;" style-hover="background: #37416A;">{{ L.challenge }} &rarr;</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showQuiz }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Game Quiz" style="max-width: 640px; width: 100%; background: #F5EFE2; border-radius: 10px; padding: 34px 38px 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); animation: cardIn 0.45s ease-out both;">
+        <div style="font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #7A5427; font-weight: 800;">{{ L.chapter }} {{ levelNo }} / 6 · {{ L.challenge }}</div>
+        <h2 style="font-family: Marcellus, serif; font-size: 26px; font-weight: 400; margin: 10px 0 22px; line-height: 1.3;">{{ question }}</h2>
+        <sc-if value="{{ isOrder }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <div style="min-height: 56px; border: 1.5px dashed #B99C5E; border-radius: 8px; padding: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <sc-if value="{{ orderEmpty }}" hint-placeholder-val="{{ true }}"><span style="color: #8A7657; font-size: 14px; font-style: italic; padding: 0 6px;">{{ L.orderHere }}</span></sc-if>
+              <sc-for list="{{ placed }}" as="p" hint-placeholder-count="0">
+                <span style="background: #44507E; color: #F6F0E2; border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 700; animation: popIn 0.3s both;">{{ p.n }}. {{ p.label }}</span>
+              </sc-for>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+                <button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isChoice }}" hint-placeholder-val="{{ true }}">
+          <div style="display: grid; gap: 10px;">
+            <sc-for list="{{ options }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.pick }}" style="{{ o.style }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showFeedback }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Game Feedback" style="max-width: 640px; width: 100%; background: #F5EFE2; border-radius: 10px; padding: 34px 38px 32px; box-shadow: 0 30px 60px rgba(0,0,0,0.4); animation: cardIn 0.4s ease-out both; text-align: center;">
+        <div style="{{ fbBadgeStyle }}">{{ fbBadge }}</div>
+        <h2 style="font-family: Marcellus, serif; font-size: 30px; font-weight: 400; margin: 16px 0 8px;">{{ fbTitle }}</h2>
+        <p style="font-size: 16px; line-height: 1.65; color: #4A3E2E; margin: 0 auto; max-width: 480px; text-wrap: pretty;">{{ fbText }}</p>
+        <button onClick="{{ nextLevel }}" style="margin-top: 26px; background: #B99C5E; color: #2B2118; border: none; padding: 13px 34px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer;" style-hover="background: #CBB077;">{{ fbNext }}</button>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showEnd }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="Game End" style="text-align: center; max-width: 620px; animation: cardIn 0.5s ease-out both;">
+        <div style="width: 110px; height: 110px; margin: 0 auto; border-radius: 50%; border: 2px solid #B99C5E; background-color: #EAD9B6; background-image: radial-gradient(circle at 25% 25%, #6B4A1F 0 5px, transparent 6px), radial-gradient(circle at 75% 75%, #6B4A1F 0 5px, transparent 6px); background-size: 26px 26px; display: grid; place-items: center; animation: popIn 0.6s 0.2s both;">
+          <div style="background: rgba(245,239,226,0.94); border-radius: 50%; width: 74px; height: 74px; display: grid; place-items: center; font-family: Marcellus, serif; font-size: 26px; color: #7A5427;">{{ score }}/6</div>
+        </div>
+        <div style="font-size: 13px; letter-spacing: 0.26em; text-transform: uppercase; color: #B99C5E; font-weight: 700; margin-top: 24px;">{{ L.endKicker }}</div>
+        <h1 style="font-family: Marcellus, serif; font-size: clamp(36px, 5vw, 54px); color: #F2E9D5; font-weight: 400; margin: 10px 0 0;">{{ endTitle }}</h1>
+        <p style="color: #C9B99A; font-size: 17px; line-height: 1.65; margin: 16px auto 0; max-width: 460px; text-wrap: pretty;">{{ endText }}</p>
+        <div style="display: flex; gap: 12px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+          <button onClick="{{ replay }}" style="background: #B99C5E; color: #2B2118; border: none; padding: 13px 32px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer;" style-hover="background: #CBB077;">&#8634; {{ L.replay }}</button>
+          <a href="game-3d-membatik.html" style="border: 1px solid rgba(185,156,94,0.6); color: #F2E9D5; padding: 13px 32px; border-radius: 999px; font-size: 15px; font-weight: 700;" style-hover="background: rgba(185,156,94,0.2); color: #F2E9D5;">Game 3D</a>
+          <a href="asal-usul-batik-3d.html" style="border: 1px solid rgba(185,156,94,0.6); color: #F2E9D5; padding: 13px 32px; border-radius: 999px; font-size: 15px; font-weight: 700;" style-hover="background: rgba(185,156,94,0.2); color: #F2E9D5;">{{ L.watchFilm }}</a>
+          <a href="Batik Nusantara.dc.html" style="border: 1px solid rgba(185,156,94,0.6); color: #F2E9D5; padding: 13px 32px; border-radius: 999px; font-size: 15px; font-weight: 700;" style-hover="background: rgba(185,156,94,0.2); color: #F2E9D5;">{{ L.back }}</a>
+        </div>
+      </div>
+    </sc-if>
+  </main>
+
+  <div style="position: relative; z-index: 5; height: 12px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 7px, transparent 7px 20px); opacity: 0.45;"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 800 },
+  &quot;defaultLang&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;id&quot;, &quot;en&quot;], &quot;default&quot;: &quot;id&quot;, &quot;tsType&quot;: &quot;'id' | 'en'&quot;, &quot;section&quot;: &quot;Perilaku&quot; }
+}">
+class Component extends DCLogic {
+  state = { screen: 'start', level: 0, score: 0, picked: null, placed: [], wrongChip: null, mistakes: 0, lang: null };
+
+  static shuffle(a) { const x = a.slice(); for (let i = x.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [x[i], x[j]] = [x[j], x[i]]; } return x; }
+
+  start = () => this.setState({ screen: 'story', level: 0, score: 0 });
+  toQuiz = () => {
+    const lv = this.levels()[this.state.level];
+    this.setState({ screen: 'quiz', picked: null, placed: [], mistakes: 0, chipOrder: Component.shuffle(lv.type === 'order' ? [0,1,2,3,4] : []) });
+  };
+  nextLevel = () => {
+    const n = this.state.level + 1;
+    if (n >= 6) this.setState({ screen: 'end' });
+    else this.setState({ screen: 'story', level: n });
+  };
+  replay = () => this.setState({ screen: 'start', level: 0, score: 0 });
+
+  pickChoice(i, correct) {
+    if (this.state.screen !== 'quiz') return;
+    this.setState({ picked: i, screen: 'feedback', lastCorrect: i === correct, score: this.state.score + (i === correct ? 1 : 0) });
+  }
+  pickChip(i) {
+    const lv = this.levels()[this.state.level];
+    const next = this.state.placed.length;
+    if (i === next) {
+      const placed = [...this.state.placed, i];
+      if (placed.length === 5) {
+        const perfect = this.state.mistakes === 0;
+        this.setState({ placed, screen: 'feedback', lastCorrect: perfect, score: this.state.score + (perfect ? 1 : 0) });
+      } else this.setState({ placed, wrongChip: null });
+    } else {
+      this.setState({ wrongChip: i, mistakes: this.state.mistakes + 1 });
+      setTimeout(() => this.setState({ wrongChip: null }), 500);
+    }
+  }
+
+  levels() {
+    const lang = this.state.lang ?? (this.props.defaultLang ?? 'id');
+    const t = (o) => (typeof o === 'string' ? o : o[lang]);
+    const L = [
+      { title: { id: 'Amba Nitik', en: 'Amba Nitik' },
+        story: { id: 'Semua bermula dari sebuah kata. Dalam bahasa Jawa, amba berarti menulis dan nitik berarti membuat titik. Batik adalah \u201cmenulis titik\u201d di atas kain dengan malam \u2014 lilin panas \u2014 yang dituangkan lewat canting. Bagian yang tertutup malam akan menolak warna saat kain dicelup.', en: 'Everything begins with a word. In Javanese, amba means to write and nitik means to make dots. Batik is \u201cwriting dots\u201d on cloth with malam \u2014 hot wax \u2014 poured through a canting pen. Waxed areas resist the dye when the cloth is dipped.' },
+        q: { id: 'Dari bahasa Jawa, apa arti kata \u201cbatik\u201d?', en: 'From Javanese, what does \u201cbatik\u201d mean?' },
+        opts: [
+          { id: 'Menulis titik demi titik', en: 'Writing dot by dot' },
+          { id: 'Kain untuk raja', en: 'Cloth for kings' },
+          { id: 'Gambar bunga', en: 'Flower drawing' },
+          { id: 'Warna dari alam', en: 'Color from nature' }
+        ], correct: 0,
+        why: { id: 'Benar: amba (menulis) + nitik (titik). Itulah jiwa batik \u2014 menulis doa titik demi titik.', en: 'Right: amba (to write) + nitik (dot). That is the soul of batik \u2014 writing prayers dot by dot.' } },
+      { title: { id: 'Urutan Membatik', en: 'The Batik Process' },
+        story: { id: 'Selembar batik tulis lahir lewat tahapan yang tak boleh terbalik: pola digambar pensil (nyorek), garis ditulis malam dengan canting (nglowong), bidang terang ditutup malam (nembok), kain dicelup warna (medel), lalu direbus agar malam luruh (nglorod).', en: 'A hand-drawn batik is born through steps that cannot be swapped: the pattern is sketched (nyorek), outlined in wax with the canting (nglowong), light areas are sealed with wax (nembok), the cloth is dyed (medel), then boiled to release the wax (nglorod).' },
+        q: { id: 'Susun urutan membatik yang benar \u2014 ketuk satu per satu!', en: 'Arrange the batik steps in order \u2014 tap them one by one!' },
+        type: 'order',
+        steps: ['Nyorek', 'Nglowong', 'Nembok', 'Medel', 'Nglorod'],
+        why: { id: 'Nyorek \u2192 Nglowong \u2192 Nembok \u2192 Medel \u2192 Nglorod. Untuk motif rumit, siklus ini diulang berkali-kali!', en: 'Nyorek \u2192 Nglowong \u2192 Nembok \u2192 Medel \u2192 Nglorod. For complex motifs, the cycle repeats many times!' } },
+      { title: { id: 'Keraton Mataram', en: 'The Mataram Courts' },
+        story: { id: 'Di balik tembok keraton Yogyakarta dan Surakarta, membatik menjadi laku spiritual. Lahirlah motif larangan \u2014 pola yang hanya boleh dikenakan raja dan kerabatnya. Deretan ombak tak berujung melambangkan keteguhan; irisan buah aren melambangkan kesucian.', en: 'Behind the palace walls of Yogyakarta and Surakarta, batik-making became a spiritual practice. \u201cForbidden patterns\u201d emerged \u2014 reserved for the king and his kin. Endless waves symbolize resolve; sugar-palm slices symbolize purity.' },
+        q: { id: 'Manakah dua motif larangan keraton itu?', en: 'Which two were the forbidden court motifs?' },
+        opts: [
+          { id: 'Parang & Kawung', en: 'Parang & Kawung' },
+          { id: 'Mega Mendung & Buketan', en: 'Mega Mendung & Buketan' },
+          { id: 'Tiga Negeri & Gentongan', en: 'Tiga Negeri & Gentongan' },
+          { id: 'Cendrawasih & Asmat', en: 'Cendrawasih & Asmat' }
+        ], correct: 0,
+        why: { id: 'Parang (ombak keteguhan) dan Kawung (kesucian) dahulu khusus keluarga raja.', en: 'Parang (waves of resolve) and Kawung (purity) were once royal-only.' } },
+      { title: { id: 'Pewarna Alam', en: 'Natural Dyes' },
+        story: { id: 'Warna batik klasik lahir dari alam. Kain dicelup, dijemur, dicelup lagi \u2014 puluhan kali \u2014 hingga warnanya dalam. Biru tua datang dari fermentasi sebuah daun; cokelat khas keraton (soga) dari kulit kayu.', en: 'Classic batik colors come from nature. Cloth is dipped, dried, dipped again \u2014 dozens of times \u2014 until the color deepens. Deep blue comes from fermenting a leaf; the court\u2019s brown (soga) from tree bark.' },
+        q: { id: 'Warna biru klasik batik berasal dari\u2026', en: 'Batik\u2019s classic blue comes from\u2026' },
+        opts: [
+          { id: 'Daun nila (indigo)', en: 'Indigo leaves' },
+          { id: 'Batu lazuli', en: 'Lapis lazuli stone' },
+          { id: 'Tinta cumi', en: 'Squid ink' },
+          { id: 'Bunga telang', en: 'Butterfly-pea flowers' }
+        ], correct: 0,
+        why: { id: 'Daun nila difermentasi berhari-hari dalam tong sebelum kain dicelup berulang-ulang.', en: 'Indigo leaves ferment for days in vats before the cloth is dipped again and again.' } },
+      { title: { id: 'Pesisir & Niaga', en: 'Coast & Trade' },
+        story: { id: 'Sementara keraton menjaga pakem, kota pelabuhan membuka pintu. Kapal dagang membawa kain Gujarat, keramik Tiongkok, dan selera bunga Eropa. Di Cirebon, lukisan awan dari negeri Tiongkok menjelma menjadi motif yang paling dikenal.', en: 'While the courts kept tradition, port towns opened their doors. Trading ships brought Gujarati cloth, Chinese ceramics, European florals. In Cirebon, Chinese cloud paintings became one of batik\u2019s most famous motifs.' },
+        q: { id: 'Motif Cirebon yang terinspirasi seni Tiongkok adalah\u2026', en: 'The Cirebon motif inspired by Chinese art is\u2026' },
+        opts: [
+          { id: 'Mega Mendung', en: 'Mega Mendung' },
+          { id: 'Truntum', en: 'Truntum' },
+          { id: 'Sidomukti', en: 'Sidomukti' },
+          { id: 'Jlamprang', en: 'Jlamprang' }
+        ], correct: 0,
+        why: { id: 'Mega Mendung \u2014 awan pembawa hujan. Pemimpin harus teduh dan menyejukkan, seperti awan.', en: 'Mega Mendung \u2014 rain-bearing clouds. A leader should bring calm and shade, like a cloud.' } },
+      { title: { id: 'Warisan Dunia', en: 'World Heritage' },
+        story: { id: 'Tahun 1840-an canting cap tembaga ditemukan dan batik menyebar dari keraton ke rakyat. Satu setengah abad kemudian, dunia mengakuinya: UNESCO menetapkan Batik Indonesia sebagai Warisan Budaya Takbenda Kemanusiaan \u2014 dan tanggalnya kini menjadi Hari Batik Nasional.', en: 'In the 1840s the copper stamp was invented and batik spread from palace to people. A century and a half later, the world took notice: UNESCO inscribed Indonesian Batik as Intangible Cultural Heritage \u2014 and the date is now National Batik Day.' },
+        q: { id: 'Kapan UNESCO menetapkan Batik Indonesia sebagai warisan dunia?', en: 'When did UNESCO inscribe Indonesian Batik?' },
+        opts: [
+          { id: '2 Oktober 2009', en: '2 October 2009' },
+          { id: '17 Agustus 1945', en: '17 August 1945' },
+          { id: '28 Oktober 1928', en: '28 October 1928' },
+          { id: '2 Mei 1998', en: '2 May 1998' }
+        ], correct: 0,
+        why: { id: '2 Oktober 2009 \u2014 sejak itu kita merayakan Hari Batik Nasional setiap 2 Oktober.', en: '2 October 2009 \u2014 celebrated ever since as National Batik Day.' } }
+    ];
+    return L.map(x => ({ ...x, _t: t }));
+  }
+
+  renderVals() {
+    const lang = this.state.lang ?? (this.props.defaultLang ?? 'id');
+    const t = (o) => (typeof o === 'string' ? o : o[lang]);
+    const STR = {
+      id: { title: 'Jejak Batik: Petualangan Asal Usul', kicker: 'Permainan Edukasi', back: 'Beranda',
+        startTitle: 'Telusuri Asal Usul Batik', startLede: 'Enam bab perjalanan \u2014 baca kisahnya, taklukkan tantangannya. Dari makna kata \u201cbatik\u201d hingga pengakuan dunia.',
+        startCta: 'Mulai Petualangan', chapter: 'Bab', challenge: 'Tantangan', orderHere: 'Ketuk langkah di bawah sesuai urutan\u2026',
+        correct: 'Benar!', wrong: 'Belum tepat', next: 'Bab Berikutnya', finish: 'Lihat Hasil',
+        endKicker: 'Petualangan Selesai', replay: 'Main Lagi', watchFilm: 'Tonton Filmnya',
+        rank3: 'Empu Batik', rank2: 'Penjaga Warisan', rank1: 'Pelajar Batik',
+        endText3: 'Sempurna! Kamu memahami asal usul batik dari kata hingga pengakuan dunia. Wariskan ceritanya!',
+        endText2: 'Hebat! Sebagian besar kisah batik sudah kamu kuasai. Tonton filmnya untuk melengkapi bab yang terlewat.',
+        endText1: 'Awal yang baik! Coba tonton film asal usul lalu main lagi \u2014 pasti skornya naik.' },
+      en: { title: 'Batik Trail: An Origin Adventure', kicker: 'Educational Game', back: 'Home',
+        startTitle: 'Trace the Origins of Batik', startLede: 'A six-chapter journey \u2014 read the story, beat the challenge. From the meaning of the word \u201cbatik\u201d to world recognition.',
+        startCta: 'Start the Adventure', chapter: 'Chapter', challenge: 'Challenge', orderHere: 'Tap the steps below in order\u2026',
+        correct: 'Correct!', wrong: 'Not quite', next: 'Next Chapter', finish: 'See Results',
+        endKicker: 'Adventure Complete', replay: 'Play Again', watchFilm: 'Watch the Film',
+        rank3: 'Batik Master', rank2: 'Heritage Keeper', rank1: 'Batik Apprentice',
+        endText3: 'Perfect! You know batik\u2019s origins from the word itself to world recognition. Pass the story on!',
+        endText2: 'Great! You\u2019ve mastered most of the story. Watch the film to fill in the missing chapter.',
+        endText1: 'A good start! Watch the origin film, then play again \u2014 your score will climb.' }
+    };
+    const L = STR[lang];
+    const lv = this.levels()[this.state.level];
+    const { screen, level, placed, wrongChip, picked, score } = this.state;
+
+    const dots = Array.from({ length: 6 }, (_, i) => ({
+      label: (i + 1) + '', style: {
+        width: '30px', height: '6px', borderRadius: '3px',
+        background: i < level || screen === 'end' ? '#B99C5E' : (i === level && screen !== 'start' ? '#F2E9D5' : 'rgba(185,156,94,0.25)'),
+        transition: 'background 0.3s'
+      }
+    }));
+
+    const optBase = { textAlign: 'left', background: '#FDFAF1', border: '1.5px solid #C9B685', borderRadius: '8px', padding: '14px 18px', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '15.5px', fontWeight: 600, color: '#2B2118', cursor: 'pointer', transition: 'background 0.2s, border-color 0.2s' };
+    const options = (lv.opts || []).map((o, i) => ({
+      label: t(o), pick: () => this.pickChoice(i, lv.correct),
+      style: { ...optBase }
+    }));
+
+    const chipOrder = this.state.chipOrder || [];
+    const chipBase = { background: '#FDFAF1', border: '1.5px solid #C9B685', borderRadius: '999px', padding: '10px 18px', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '14.5px', fontWeight: 700, color: '#2B2118', cursor: 'pointer' };
+    const chips = chipOrder.filter(i => !placed.includes(i)).map(i => ({
+      label: lv.steps ? lv.steps[i] : '', pick: () => this.pickChip(i),
+      style: wrongChip === i
+        ? { ...chipBase, borderColor: '#A34A3F', background: '#F3DCD6', animation: 'shakeX 0.4s' }
+        : chipBase
+    }));
+    const placedArr = placed.map((i, n) => ({ n: n + 1, label: lv.steps ? lv.steps[i] : '' }));
+
+    const isLast = level >= 5;
+    return {
+      L, dots, levelNo: level + 1,
+      storyTitle: t(lv.title), storyText: t(lv.story), question: t(lv.q),
+      isOrder: lv.type === 'order', isChoice: lv.type !== 'order',
+      options, chips, placed: placedArr, orderEmpty: placed.length === 0,
+      showStart: screen === 'start', showStory: screen === 'story', showQuiz: screen === 'quiz',
+      showFeedback: screen === 'feedback', showEnd: screen === 'end',
+      fbBadge: this.state.lastCorrect ? '\u2713' : '\u2717',
+      fbBadgeStyle: { width: '58px', height: '58px', margin: '0 auto', borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: '28px', fontWeight: 800, color: '#F6F0E2', background: this.state.lastCorrect ? '#5B7247' : '#A34A3F', animation: 'popIn 0.4s both' },
+      fbTitle: this.state.lastCorrect ? L.correct : L.wrong,
+      fbText: t(lv.why), fbNext: isLast ? L.finish : L.next,
+      score,
+      endTitle: score >= 6 ? L.rank3 : score >= 4 ? L.rank2 : L.rank1,
+      endText: score >= 6 ? L.endText3 : score >= 4 ? L.endText2 : L.endText1,
+      start: this.start, toQuiz: this.toQuiz, nextLevel: this.nextLevel, replay: this.replay,
+      setId: () => this.setState({ lang: 'id' }),
+      setEn: () => this.setState({ lang: 'en' }),
+      idBtnStyle: lang === 'id' ? { border: 'none', background: '#B99C5E', color: '#2B2118', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '13px', fontWeight: 700, padding: '7px 12px' } : { border: 'none', background: 'transparent', color: '#B99C5E', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '13px', fontWeight: 700, padding: '7px 12px' },
+      enBtnStyle: lang === 'en' ? { border: 'none', background: '#B99C5E', color: '#2B2118', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '13px', fontWeight: 700, padding: '7px 12px' } : { border: 'none', background: 'transparent', color: '#B99C5E', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '13px', fontWeight: 700, padding: '7px 12px' }
+    };
+  }
+}
+</script>
+</body>
+</html>

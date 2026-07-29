@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game 3D: Membatik — Batik Nusantara</title>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": { "three": "https://unpkg.com/three@0.184.0/build/three.module.js" },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT"
+  }
+}
+</script>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #211910; font-family: 'Alegreya Sans', sans-serif; }
+  #stage { position: fixed; left: 0; right: 0; top: 50px; bottom: 50px; cursor: crosshair; }
+  .bar-top, .bar-bot { position: fixed; left: 0; right: 0; height: 50px; background: #211910; z-index: 8; }
+  .bar-top { top: 0; } .bar-bot { bottom: 0; }
+  .top { position: fixed; top: 13px; left: 24px; z-index: 10; display: flex; align-items: baseline; gap: 14px; }
+  .top .brand { font-family: Marcellus, serif; font-size: 16px; color: #B99C5E; letter-spacing: 0.12em; }
+  .top a { color: #8A7657; font-size: 13px; font-weight: 700; text-decoration: none; }
+  .top a:hover { color: #B99C5E; }
+  #dots { position: fixed; top: 18px; right: 24px; z-index: 10; display: flex; gap: 6px; }
+  #dots div { width: 26px; height: 5px; border-radius: 3px; background: rgba(185,156,94,0.25); transition: background 0.3s; }
+  #dots div.on { background: #B99C5E; }
+  #dots div.now { background: #F2E9D5; }
+  #card { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(33,25,16,0.78); backdrop-filter: blur(3px); }
+  #card .box { max-width: 560px; width: calc(100% - 60px); background: #F5EFE2; border-radius: 10px; padding: 30px 34px 28px; box-shadow: 0 30px 60px rgba(0,0,0,0.5); }
+  #card .kick { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #7A5427; font-weight: 800; }
+  #card h2 { font-family: Marcellus, serif; font-size: 30px; font-weight: 400; margin: 8px 0 12px; color: #2B2118; }
+  #card p { font-size: 16px; line-height: 1.65; color: #4A3E2E; margin: 0; }
+  #card .task { margin-top: 14px; padding: 12px 16px; background: #EADFC4; border-radius: 8px; font-size: 14.5px; font-weight: 700; color: #5C4E3B; }
+  #card button { margin-top: 20px; background: #B99C5E; color: #211910; border: none; padding: 13px 34px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 800; cursor: pointer; }
+  #card button:hover { background: #CBB077; }
+  #hud { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); z-index: 12; display: none; flex-direction: column; align-items: center; gap: 10px; width: min(520px, calc(100% - 48px)); }
+  #hint { background: rgba(33,25,16,0.85); border: 1px solid rgba(185,156,94,0.4); color: #F2E9D5; font-size: 15px; padding: 9px 20px; border-radius: 999px; text-align: center; }
+  #pbar { width: 100%; height: 7px; background: rgba(242,233,213,0.15); border-radius: 4px; overflow: hidden; }
+  #pfill { height: 100%; width: 0%; background: #B99C5E; transition: width 0.15s; }
+  #holdBtn { display: none; background: #B99C5E; color: #211910; border: none; padding: 15px 40px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 16px; font-weight: 800; cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: none; }
+  #holdBtn:active { background: #CBB077; }
+  #veil { position: fixed; inset: 0; z-index: 15; pointer-events: none; background: #211910; opacity: 0; transition: opacity 0.45s; }
+  #toast { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 12; background: #5B7247; color: #F2E9D5; font-size: 14px; font-weight: 700; padding: 8px 22px; border-radius: 999px; opacity: 0; transition: opacity 0.3s; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="bar-top"></div>
+<div class="bar-bot"></div>
+<div class="top">
+  <div class="brand">GAME 3D · MEMBATIK</div>
+  <a href="Batik Nusantara.dc.html">&larr; Beranda</a>
+  <a href="Game Batik.dc.html">Kuis Jejak Batik</a>
+  <a href="#" id="muteBtn" style="color:#B99C5E;">Suara: Nyala</a>
+</div>
+<div id="dots"></div>
+<div id="veil"></div>
+<div id="toast"></div>
+<div id="card">
+  <div class="box">
+    <div class="kick" id="cKick">Selamat Datang</div>
+    <h2 id="cTitle">Menjadi Pembatik</h2>
+    <p id="cText">Rasakan sendiri asal usul batik — langkah demi langkah, dari canting hingga kain jadi. Lima tahap menantimu di atas meja membatik 3D ini.</p>
+    <div class="task" id="cTask">Ikuti petunjuk di bagian bawah layar pada tiap tahap.</div>
+    <button id="cBtn">Mulai</button>
+  </div>
+</div>
+<div id="hud">
+  <div id="hint"></div>
+  <div id="pbar"><div id="pfill"></div></div>
+  <button id="holdBtn">Tahan</button>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ── kanvas kain ──────────────────────────────────────────
+const CW = 1024, CH = 640;
+const patCv = document.createElement('canvas'); patCv.width = CW; patCv.height = CH;
+{
+  const g = patCv.getContext('2d');
+  g.strokeStyle = '#6B4A1F'; g.lineWidth = 13;
+  for (let i = -CH; i < CW; i += 46) { g.beginPath(); g.moveTo(i, CH); g.lineTo(i + CH, 0); g.stroke(); }
+  g.strokeStyle = 'rgba(107,74,31,0.5)'; g.lineWidth = 5;
+  for (let i = -CH + 23; i < CW; i += 46) { g.beginPath(); g.moveTo(i, CH); g.lineTo(i + CH, 0); g.stroke(); }
+}
+const cv = document.createElement('canvas'); cv.width = CW; cv.height = CH;
+const ctx = cv.getContext('2d');
+const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+const WAXZ = [[0.18, 0.3], [0.5, 0.22], [0.82, 0.32], [0.32, 0.72], [0.68, 0.74]];
+function baseCloth(pencil) {
+  ctx.fillStyle = '#F1E6C8'; ctx.fillRect(0, 0, CW, CH);
+  if (pencil) { ctx.globalAlpha = 0.18; ctx.drawImage(patCv, 0, 0); ctx.globalAlpha = 1; }
+  tex.needsUpdate = true;
+}
+function waxCircle(u, v, r, glow) {
+  const x = u * CW, y = (1 - v) * CH;
+  ctx.fillStyle = glow ? 'rgba(61,46,25,0.92)' : 'rgba(61,46,25,0.92)';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  tex.needsUpdate = true;
+}
+// ── scene ────────────────────────────────────────────────
+const stageEl = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stageEl.clientWidth, stageEl.clientHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.06;
+stageEl.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#EFE3C8');
+scene.fog = new THREE.Fog('#EFE3C8', 9, 22);
+const camera = new THREE.PerspectiveCamera(46, stageEl.clientWidth / stageEl.clientHeight, 0.1, 50);
+scene.add(new THREE.HemisphereLight(0xfff2da, 0xa89a7e, 1.15));
+const key = new THREE.DirectionalLight(0xffe9c0, 1.5); key.position.set(3.5, 6, 4);
+key.castShadow = true;
+key.shadow.mapSize.set(1024, 1024);
+key.shadow.camera.left = -4; key.shadow.camera.right = 4;
+key.shadow.camera.top = 4; key.shadow.camera.bottom = -4;
+key.shadow.bias = -0.0005;
+scene.add(key);
+
+const M = {
+  kayu: new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.7 }),
+  kayuTua: new THREE.MeshStandardMaterial({ color: 0x5e3d1c, roughness: 0.8 }),
+  tembaga: new THREE.MeshStandardMaterial({ color: 0xc47f35, roughness: 0.35, metalness: 0.35 }),
+  nila: new THREE.MeshStandardMaterial({ color: 0x2f3a63, roughness: 0.4 }),
+  bara: new THREE.MeshStandardMaterial({ color: 0xff8a3c, emissive: 0xff5a1f, emissiveIntensity: 1.3, roughness: 0.6 })
+};
+// lantai
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0xd9c69a, roughness: 0.95 }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -1.3; floor.receiveShadow = true; scene.add(floor);
+// meja
+const table = new THREE.Group();
+const top = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.12, 2.2), M.kayu); top.castShadow = true; top.receiveShadow = true; table.add(top);
+for (const [sx, sz] of [[-1.5, -0.9], [1.5, -0.9], [-1.5, 0.9], [1.5, 0.9]]) {
+  const leg = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.2, 0.12), M.kayuTua);
+  leg.position.set(sx, -0.66, sz); table.add(leg);
+}
+table.position.y = -0.06; scene.add(table);
+// kain
+const cloth = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.55, 60, 40),
+  new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.9 }));
+cloth.userData.base = cloth.geometry.attributes.position.array.slice();
+cloth.castShadow = true; cloth.receiveShadow = true;
+scene.add(cloth);
+// canting mengikuti kursor
+const canting = new THREE.Group();
+const gag = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.028, 0.44, 20), M.kayu);
+gag.rotation.z = -0.9; gag.position.set(0.16, 0.24, 0); canting.add(gag);
+const mangkuk = new THREE.Mesh(new THREE.SphereGeometry(0.06, 20, 14, 0, Math.PI * 2, 0, Math.PI * 0.62), M.tembaga);
+mangkuk.position.y = 0.06; canting.add(mangkuk);
+const cucuk = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.011, 0.12, 12), M.tembaga);
+cucuk.rotation.z = 2.2; cucuk.position.set(-0.055, 0.02, 0); canting.add(cucuk);
+canting.visible = false; canting.traverse(o => { if (o.isMesh) o.castShadow = true; }); scene.add(canting);
+const cantingTarget = new THREE.Vector3();
+// cap tembaga
+const cap = new THREE.Group();
+const blok = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.09, 0.45), M.tembaga); cap.add(blok);
+const peg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.3, 12), M.kayuTua);
+peg.position.y = 0.2; cap.add(peg);
+cap.visible = false; cap.traverse(o => { if (o.isMesh) o.castShadow = true; }); scene.add(cap);
+// tong pewarna
+const vat = new THREE.Group();
+const vbody = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.7, 1.1, 32), M.kayu);
+vat.add(vbody);
+const vliq = new THREE.Mesh(new THREE.CylinderGeometry(0.79, 0.79, 0.05, 32), M.nila);
+vliq.position.y = 0.53; vat.add(vliq);
+for (const ry of [-0.3, 0.2]) {
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.81 + ry * 0.1, 0.025, 10, 40), M.tembaga);
+  ring.rotation.x = Math.PI / 2; ring.position.y = ry; vat.add(ring);
+}
+vat.position.set(0, -0.7, 0); vat.visible = false; scene.add(vat);
+// kuali nglorod + bara
+const pot = new THREE.Group();
+const pbody = new THREE.Mesh(new THREE.LatheGeometry(
+  Array.from({ length: 10 }, (_, i) => new THREE.Vector2(0.15 + Math.sin((i / 9) * Math.PI * 0.55) * 0.75, (i / 9) * 0.8)), 36), M.kayuTua);
+pot.add(pbody);
+const pliq = new THREE.Mesh(new THREE.CylinderGeometry(0.68, 0.68, 0.04, 32),
+  new THREE.MeshStandardMaterial({ color: 0x8a97b8, roughness: 0.25 }));
+pliq.position.y = 0.72; pot.add(pliq);
+const bara = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 0.16, 24), M.bara);
+bara.position.y = -0.1; pot.add(bara);
+pot.position.set(0, -0.95, 0); pot.visible = false; scene.add(pot);
+// uap
+const steamN = 60;
+const steamGeo = new THREE.BufferGeometry();
+steamGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(steamN * 3).fill(999), 3));
+const steamSprite = (() => {
+  const c = document.createElement('canvas'); c.width = 64; c.height = 64;
+  const g = c.getContext('2d');
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 30);
+  gr.addColorStop(0, 'rgba(255,255,255,0.9)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); return t;
+})();
+const steam = new THREE.Points(steamGeo, new THREE.PointsMaterial({ size: 0.3, map: steamSprite, transparent: true, opacity: 0.5, depthWrite: false }));
+scene.add(steam);
+const steamP = Array.from({ length: steamN }, () => ({ a: false, x: 0, y: 0, z: 0, s: 0 }));
+// cincin penanda nembok
+const rings = WAXZ.map(([u, v]) => {
+  const r = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.014, 10, 36),
+    new THREE.MeshStandardMaterial({ color: 0xb99c5e, emissive: 0x8a6a2c, emissiveIntensity: 0.7 }));
+  r.visible = false; scene.add(r);
+  r.userData.uv = [u, v];
+  return r;
+});
+// kotak target cap
+const capCells = [];
+for (let i = 0; i < 6; i++) {
+  const e = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.42),
+    new THREE.MeshBasicMaterial({ color: 0xb99c5e, transparent: true, opacity: 0.22, side: THREE.DoubleSide }));
+  e.visible = false; scene.add(e);
+  capCells.push(e);
+}
+
+// ── level definitions ────────────────────────────────────
+const LEVELS = [
+  { kick: 'Tahap 1 · Nglowong', title: 'Menulis dengan Canting',
+    text: 'Batik berasal dari kata Jawa amba (menulis) dan nitik (titik). Sejak era Mataram, para pembatik menulis pola dengan malam panas lewat canting — pekerjaan penuh doa yang bisa berbulan-bulan.',
+    task: 'Gerakkan kursor (atau jari) di atas kain untuk menorehkan malam mengikuti pola pensil, sampai seluruh kain tertulis.',
+    hint: 'Toreh malam ke seluruh kain — gosok sampai 100%' },
+  { kick: 'Tahap 2 · Nembok', title: 'Menutup Bidang',
+    text: 'Bagian kain yang ingin tetap terang \u201cditembok\u201d — ditutup malam tebal agar menolak warna saat dicelup. Dari sinilah pola cadangan warna batik terbentuk.',
+    task: 'Klik kelima lingkaran emas pada kain untuk menutupnya dengan malam.',
+    hint: 'Klik lingkaran bertanda — 5 bidang' },
+  { kick: 'Tahap 3 · Medel', title: 'Mencelup Nila',
+    text: 'Warna klasik batik lahir dari alam: biru dari daun nila yang difermentasi, cokelat soga dari kulit kayu. Kain dicelup dan diangin-anginkan berulang kali hingga warnanya dalam.',
+    task: 'Tahan tombol untuk mencelup kain ke dalam tong nila. Ulangi 3 kali celupan.',
+    hint: 'Tahan tombol untuk mencelup — 3 celupan', hold: 'Tahan: Celup' },
+  { kick: 'Tahap 4 · Nglorod', title: 'Meluruhkan Malam',
+    text: 'Kain direbus dalam air mendidih agar malam luruh — dan pola yang ditulis berbulan-bulan akhirnya muncul. Untuk motif rumit, seluruh siklus diulang dari awal.',
+    task: 'Tahan tombol untuk merebus kain sampai semua malam luruh.',
+    hint: 'Tahan tombol untuk merebus', hold: 'Tahan: Rebus' },
+  { kick: 'Tahap 5 · Canting Cap', title: 'Era Batik Rakyat',
+    text: 'Tahun 1840-an lahir canting cap — stempel tembaga yang memangkas pekerjaan berbulan-bulan menjadi hitungan hari. Batik pun menyebar dari keraton ke rumah rakyat.',
+    task: 'Klik keenam petak pada kain baru untuk mengecapnya dengan stempel tembaga.',
+    hint: 'Klik petak kain untuk mengecap — 6 petak' },
+  { kick: 'Selesai · 2 Oktober 2009', title: 'Warisan Dunia',
+    text: 'Kain buatanmu selesai! Pengetahuan yang baru kamu jalankan inilah — teknik, simbol, dan budayanya — yang ditetapkan UNESCO sebagai Warisan Budaya Takbenda Kemanusiaan pada 2 Oktober 2009.',
+    task: 'Terima kasih sudah menjaga warisan. Coba juga kuis & filmnya!',
+    hint: '' }
+];
+const dotsEl = document.getElementById('dots');
+LEVELS.slice(0, 5).forEach(() => { const d = document.createElement('div'); dotsEl.appendChild(d); });
+
+// ── audio: gamelan ambient + efek suara (WebAudio) ──────
+let actx = null, master = null, musicGain = null, muted = false, musicTimer = null;
+const SLENDRO = [261.6, 293.7, 329.6, 392.0, 440.0];
+function initAudio() {
+  if (actx) return;
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  master = actx.createGain(); master.gain.value = 1; master.connect(actx.destination);
+  musicGain = actx.createGain(); musicGain.gain.value = 0.07; musicGain.connect(master);
+  let step = 0;
+  (function pluck() {
+    if (!actx) return;
+    const now = actx.currentTime;
+    if (step % 16 === 0) {
+      const og = actx.createOscillator(), gg = actx.createGain();
+      og.type = 'sine'; og.frequency.value = 65.4;
+      og.connect(gg); gg.connect(musicGain);
+      gg.gain.setValueAtTime(0.0001, now);
+      gg.gain.exponentialRampToValueAtTime(0.7, now + 0.04);
+      gg.gain.exponentialRampToValueAtTime(0.0001, now + 3.2);
+      og.start(now); og.stop(now + 3.3);
+    }
+    const f = SLENDRO[[0, 2, 4, 3, 1, 3, 2, 0][step % 8]] * (step % 16 < 8 ? 1 : 0.5);
+    const o = actx.createOscillator(), gn = actx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    o.connect(gn); gn.connect(musicGain);
+    gn.gain.setValueAtTime(0.0001, now);
+    gn.gain.exponentialRampToValueAtTime(0.45, now + 0.02);
+    gn.gain.exponentialRampToValueAtTime(0.0001, now + 1.5);
+    o.start(now); o.stop(now + 1.6);
+    step++;
+    musicTimer = setTimeout(pluck, 680);
+  })();
+}
+function noiseBuf(dur) {
+  const n = Math.floor(actx.sampleRate * dur), b = actx.createBuffer(1, n, actx.sampleRate);
+  const d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+  return b;
+}
+function sfxTone(freq, dur, vol, type) {
+  if (!actx || muted) return;
+  const now = actx.currentTime;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type || 'sine'; o.frequency.value = freq;
+  o.connect(g); g.connect(master);
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(vol, now + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  o.start(now); o.stop(now + dur + 0.05);
+}
+function sfxNoise(dur, vol, fFrom, fTo) {
+  if (!actx || muted) return;
+  const now = actx.currentTime;
+  const src = actx.createBufferSource(); src.buffer = noiseBuf(dur);
+  const f = actx.createBiquadFilter(); f.type = 'lowpass';
+  f.frequency.setValueAtTime(fFrom, now);
+  f.frequency.exponentialRampToValueAtTime(fTo, now + dur);
+  const g = actx.createGain();
+  src.connect(f); f.connect(g); g.connect(master);
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(vol, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+  src.start(now);
+}
+let lastBrushSfx = 0;
+const sfx = {
+  brush() { const n = performance.now(); if (n - lastBrushSfx > 95) { lastBrushSfx = n; sfxNoise(0.09, 0.05, 2400, 900); } },
+  wax() { sfxTone(190, 0.22, 0.25, 'sine'); sfxNoise(0.1, 0.06, 800, 300); },
+  splash() { sfxNoise(0.5, 0.3, 1600, 220); sfxTone(140, 0.3, 0.12, 'sine'); },
+  boil() { if (Math.random() < 0.25) sfxTone(90 + Math.random() * 160, 0.12, 0.06, 'sine'); if (Math.random() < 0.1) sfxNoise(0.15, 0.05, 700, 250); },
+  stamp() { sfxTone(70, 0.18, 0.4, 'sine'); sfxNoise(0.06, 0.12, 3000, 800); },
+  done() { sfxTone(523.3, 0.35, 0.2, 'triangle'); setTimeout(() => sfxTone(659.3, 0.5, 0.2, 'triangle'), 140); },
+  end() { [523.3, 659.3, 784, 1046.5].forEach((f, i) => setTimeout(() => sfxTone(f, 0.6, 0.18, 'triangle'), i * 170)); }
+};
+const muteBtn = document.getElementById('muteBtn');
+muteBtn.onclick = (e) => {
+  e.preventDefault();
+  muted = !muted;
+  if (musicGain) musicGain.gain.value = muted ? 0 : 0.07;
+  muteBtn.textContent = muted ? 'Suara: Mati' : 'Suara: Nyala';
+};
+
+// ── game state ───────────────────────────────────────────
+let level = -1, playing = false, prog = 0;
+let painted = new Set(), waxDone = 0, dips = 0, dipping = false, boiling = false, boilP = 0, stamped = 0, capBusy = false;
+const card = document.getElementById('card'), hud = document.getElementById('hud');
+const hintEl = document.getElementById('hint'), pfill = document.getElementById('pfill');
+const holdBtn = document.getElementById('holdBtn'), toast = document.getElementById('toast');
+const veil = document.getElementById('veil');
+const camTarget = { pos: new THREE.Vector3(0, 2.4, 2.6), look: new THREE.Vector3(0, -0.05, 0) };
+const camLook = camTarget.look.clone();
+camera.position.copy(camTarget.pos);
+
+function showToast(msg) {
+  toast.textContent = msg; toast.style.opacity = 1;
+  setTimeout(() => (toast.style.opacity = 0), 1600);
+}
+function setDots() {
+  [...dotsEl.children].forEach((d, i) => {
+    d.className = i < level ? 'on' : i === level ? 'now' : '';
+  });
+}
+function showCard(i) {
+  playing = false;
+  const c = LEVELS[i];
+  document.getElementById('cKick').textContent = c.kick;
+  document.getElementById('cTitle').textContent = c.title;
+  document.getElementById('cText').textContent = c.text;
+  document.getElementById('cTask').textContent = c.task;
+  document.getElementById('cBtn').textContent = i === 5 ? 'Main Lagi dari Awal' : (i === 0 ? 'Mulai Membatik' : 'Lanjut');
+  card.style.display = 'grid'; hud.style.display = 'none';
+}
+function flatCloth(y) {
+  cloth.rotation.set(-Math.PI / 2, 0, 0);
+  cloth.position.set(0, y, 0.05);
+}
+function setupLevel(i) {
+  rings.forEach(r => (r.visible = false));
+  capCells.forEach(c => (c.visible = false));
+  canting.visible = false; cap.visible = false; vat.visible = false; pot.visible = false;
+  table.visible = true; prog = 0; pfill.style.width = '0%';
+  holdBtn.style.display = 'none';
+  if (i === 0) {
+    baseCloth(true); painted = new Set();
+    flatCloth(0.02); canting.visible = true;
+    camTarget.pos.set(0, 2.35, 2.5); camTarget.look.set(0, -0.05, 0);
+  } else if (i === 1) {
+    waxDone = 0;
+    flatCloth(0.02);
+    rings.forEach(r => {
+      const [u, v] = r.userData.uv;
+      r.visible = true;
+      r.rotation.x = -Math.PI / 2;
+      r.position.set((u - 0.5) * 2.6, 0.04, 0.05 + (0.5 - v) * 1.55);
+    });
+    camTarget.pos.set(0, 2.35, 2.5); camTarget.look.set(0, -0.05, 0);
+  } else if (i === 2) {
+    dips = 0; dipping = false;
+    table.visible = false; vat.visible = true;
+    cloth.rotation.set(0, 0, 0);
+    cloth.position.set(0, 1.15, 0);
+    cloth.scale.setScalar(0.85);
+    camTarget.pos.set(0, 1.3, 3.6); camTarget.look.set(0, 0.4, 0);
+    holdBtn.style.display = 'inline-block'; holdBtn.textContent = LEVELS[2].hold;
+  } else if (i === 3) {
+    boiling = false; boilP = 0;
+    table.visible = false; pot.visible = true;
+    cloth.rotation.set(0, 0, 0);
+    cloth.position.set(0, 0.75, 0);
+    cloth.scale.setScalar(0.62);
+    camTarget.pos.set(0, 1.25, 3.4); camTarget.look.set(0, 0.25, 0);
+    holdBtn.style.display = 'inline-block'; holdBtn.textContent = LEVELS[3].hold;
+  } else if (i === 4) {
+    stamped = 0; capBusy = false;
+    baseCloth(false);
+    table.visible = true; cloth.scale.setScalar(1);
+    flatCloth(0.02); cap.visible = true; cap.position.set(1.6, 0.7, 0.6);
+    capCells.forEach((e, k) => {
+      const u = 0.17 + (k % 3) * 0.33, v = k < 3 ? 0.28 : 0.72;
+      e.visible = true;
+      e.rotation.x = -Math.PI / 2;
+      e.position.set((u - 0.5) * 2.6, 0.035, 0.05 + (0.5 - v) * 1.55);
+      e.userData.uv = [u, v]; e.userData.done = false;
+      e.material.opacity = 0.22;
+    });
+    camTarget.pos.set(0, 2.35, 2.5); camTarget.look.set(0, -0.05, 0);
+  } else if (i === 5) {
+    table.visible = false;
+    finalCloth();
+    cloth.rotation.set(0, 0, 0); cloth.position.set(0, 0.55, 0); cloth.scale.setScalar(1);
+    camTarget.pos.set(0, 0.75, 3.2); camTarget.look.set(0, 0.45, 0);
+  }
+  hintEl.textContent = LEVELS[i].hint;
+}
+function finalCloth() {
+  ctx.fillStyle = '#2F3A63'; ctx.fillRect(0, 0, CW, CH);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.9;
+  ctx.drawImage(patCv, 0, 0); ctx.restore();
+  ctx.globalAlpha = 1;
+  for (const [u, v] of WAXZ) {
+    ctx.fillStyle = '#F1E6C8';
+    ctx.beginPath(); ctx.arc(u * CW, (1 - v) * CH, 52, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#6B4A1F'; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(u * CW, (1 - v) * CH, 30, 0, Math.PI * 2); ctx.stroke();
+  }
+  tex.needsUpdate = true;
+}
+document.getElementById('cBtn').onclick = () => {
+  initAudio();
+  if (level === -1 || level >= 5) { level = 0; setupLevel(0); }
+  // kartu dari completeLevel: level & setup sudah siap — cukup mulai bermain
+  setDots();
+  card.style.display = 'none';
+  hud.style.display = LEVELS[level].hint ? 'flex' : 'none';
+  playing = true;
+};
+function completeLevel() {
+  playing = false;
+  showToast('Tahap selesai!');
+  sfx.done();
+  if (level === 4) setTimeout(() => sfx.end(), 600);
+  setTimeout(() => { veil.style.opacity = 1; }, 500);
+  setTimeout(() => {
+    level++; setDots(); showCard(level); setupLevel(level);
+    veil.style.opacity = 0;
+  }, 1000);
+}
+
+// ── interaction ──────────────────────────────────────────
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+function castCloth(e) {
+  const r = renderer.domElement.getBoundingClientRect();
+  mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObject(cloth)[0];
+  return hit || null;
+}
+function brush(u, v) {
+  const x = u * CW, y = (1 - v) * CH, r = 58;
+  ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.clip();
+  ctx.drawImage(patCv, 0, 0); ctx.restore();
+  tex.needsUpdate = true;
+  const gx = Math.floor(u * 18), gy = Math.floor(v * 11);
+  for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+    const nx = gx + dx, ny = gy + dy;
+    if (nx >= 0 && nx < 18 && ny >= 0 && ny < 11) painted.add(nx + ny * 18);
+  }
+  prog = painted.size / (18 * 11);
+  pfill.style.width = Math.min(100, Math.round(prog * 100)) + '%';
+  if (prog >= 0.985) { ctx.drawImage(patCv, 0, 0); tex.needsUpdate = true; completeLevel(); }
+}
+renderer.domElement.addEventListener('pointermove', (e) => {
+  if (!playing) return;
+  if (level === 0) {
+    const hit = castCloth(e);
+    if (hit) {
+      canting.visible = true;
+      cantingTarget.set(hit.point.x, hit.point.y + 0.12, hit.point.z);
+      sfx.brush();
+      brush(hit.uv.x, hit.uv.y);
+    }
+  }
+});
+renderer.domElement.addEventListener('pointerleave', () => { if (level === 0) canting.visible = false; });
+renderer.domElement.addEventListener('pointerdown', (e) => {
+  if (!playing) return;
+  if (level === 1) {
+    const hit = castCloth(e);
+    if (!hit) return;
+    for (const r of rings) {
+      if (!r.visible) continue;
+      const [u, v] = r.userData.uv;
+      if (Math.hypot(hit.uv.x - u, (hit.uv.y - v) * 0.6) < 0.075) {
+        r.visible = false;
+        waxCircle(u, v, 52);
+        sfx.wax();
+        waxDone++;
+        pfill.style.width = (waxDone / 5) * 100 + '%';
+        if (waxDone === 5) completeLevel();
+        break;
+      }
+    }
+  } else if (level === 4) {
+    const hit = castCloth(e);
+    if (!hit || capBusy) return;
+    for (const cell of capCells) {
+      if (cell.userData.done) continue;
+      const [u, v] = cell.userData.uv;
+      if (Math.abs(hit.uv.x - u) < 0.13 && Math.abs(hit.uv.y - v) < 0.16) {
+        capBusy = true; cell.userData.done = true;
+        cell.userData.stampAt = performance.now();
+        cap.userData.target = { x: (u - 0.5) * 2.6, z: 0.05 + (0.5 - v) * 1.55, u, v };
+        break;
+      }
+    }
+  }
+});
+function holdStart(e) { e.preventDefault(); if (!playing) return; if (level === 2) dipping = true; if (level === 3) boiling = true; }
+function holdEnd() { dipping = false; boiling = false; }
+holdBtn.addEventListener('pointerdown', holdStart);
+addEventListener('pointerup', holdEnd);
+addEventListener('pointercancel', holdEnd);
+
+// ── loop ─────────────────────────────────────────────────
+const clock = new THREE.Clock();
+let dipY = 1.15, dipState = 0;
+function tick() {
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = performance.now() / 1000;
+  camera.position.lerp(camTarget.pos, 0.055);
+  camLook.lerp(camTarget.look, 0.07);
+  camera.lookAt(camLook);
+  // canting meluncur halus ke posisi kursor + condong mengikuti arah gerak
+  if (level === 0 && canting.visible) {
+    const dx = cantingTarget.x - canting.position.x;
+    const dz = cantingTarget.z - canting.position.z;
+    canting.position.lerp(cantingTarget, 0.3);
+    canting.rotation.x = THREE.MathUtils.clamp(dz * 1.6, -0.3, 0.3);
+    canting.rotation.y = THREE.MathUtils.clamp(-dx * 0.8, -0.25, 0.25);
+  }
+  // gelombang idle halus pada kain saat di meja
+  if ((level === 0 || level === 1 || level === 4) && playing) {
+    const pos = cloth.geometry.attributes.position, base = cloth.userData.base;
+    for (let i = 0; i < pos.count; i++) {
+      const x = base[i * 3], y = base[i * 3 + 1];
+      pos.array[i * 3 + 2] = 0.012 * Math.sin(x * 3 + t * 1.1) + 0.008 * Math.sin(y * 4 + t * 1.6);
+    }
+    pos.needsUpdate = true; cloth.geometry.computeVertexNormals();
+  }
+  // kain bergelombang halus di level akhir
+  if (level === 5) {
+    const pos = cloth.geometry.attributes.position, base = cloth.userData.base;
+    for (let i = 0; i < pos.count; i++) {
+      const x = base[i * 3], y = base[i * 3 + 1];
+      pos.array[i * 3 + 2] = 0.06 * Math.sin(x * 2 + t * 1.3) + 0.04 * Math.sin(y * 3 + t * 1.8);
+    }
+    pos.needsUpdate = true; cloth.geometry.computeVertexNormals();
+    cloth.rotation.y = Math.sin(t * 0.4) * 0.25;
+  }
+  // level 3: celup
+  if (level === 2 && playing) {
+    const target = dipping ? 0.02 : 1.15;
+    dipY += (target - dipY) * dt * 2.2;
+    cloth.position.y = dipY;
+    cloth.rotation.z = Math.sin(t * 1.4) * 0.04;
+    const rip = dipping ? 1 + Math.sin(t * 9) * 0.012 : 1;
+    vliq.scale.set(rip, 1, rip);
+    if (dipping && dipY < 0.25 && dipState === 0) {
+      dipState = 1;
+      dips++;
+      sfx.splash();
+      ctx.save(); ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = 'rgba(70,84,140,0.45)'; ctx.fillRect(0, 0, CW, CH); ctx.restore();
+      for (const [u, v] of WAXZ) waxCircle(u, v, 52);
+      pfill.style.width = (dips / 3) * 100 + '%';
+      showToast('Celupan ke-' + dips);
+      if (dips >= 3) setTimeout(completeLevel, 700);
+    }
+    if (!dipping && dipY > 1.0) dipState = 0;
+  }
+  // level 4: rebus
+  if (level === 3 && playing) {
+    cloth.position.y = 0.75 + Math.sin(t * 2) * 0.02;
+    if (boiling) {
+      boilP = Math.min(1, boilP + dt / 4.5);
+      sfx.boil();
+      pfill.style.width = Math.round(boilP * 100) + '%';
+      for (let k = 0; k < 2; k++) {
+        const p = steamP[(Math.random() * steamN) | 0];
+        if (!p.a) { p.a = true; p.x = (Math.random() - 0.5) * 1.2; p.y = 0.75; p.z = (Math.random() - 0.5) * 0.6; p.s = 0.5 + Math.random() * 0.7; }
+      }
+      if (boilP >= 1) { finalCloth(); completeLevel(); }
+    }
+    bara.material.emissiveIntensity = 1.1 + Math.sin(t * 8) * 0.4;
+  }
+  // uap
+  {
+    const arr = steamGeo.attributes.position.array;
+    steamP.forEach((p, i) => {
+      if (p.a) {
+        p.y += dt * p.s; p.x += Math.sin(t * 2 + i) * dt * 0.12;
+        if (p.y > 2.2) p.a = false;
+        arr[i * 3] = p.x; arr[i * 3 + 1] = p.y; arr[i * 3 + 2] = p.z;
+      } else { arr[i * 3] = 999; }
+    });
+    steamGeo.attributes.position.needsUpdate = true;
+  }
+  // level 5: animasi cap
+  if (level === 4 && cap.userData.target) {
+    const tg = cap.userData.target;
+    cap.position.x += (tg.x - cap.position.x) * 0.16;
+    cap.position.z += (tg.z - cap.position.z) * 0.16;
+    const near = Math.abs(cap.position.x - tg.x) < 0.04 && Math.abs(cap.position.z - tg.z) < 0.04;
+    if (near) {
+      cap.position.y += (0.09 - cap.position.y) * 0.3;
+      blok.scale.y = Math.max(0.6, 1 - (0.7 - cap.position.y) * 0.5);
+      if (cap.position.y < 0.13) {
+        // cetak sel
+        const { u, v } = tg;
+        ctx.save(); ctx.beginPath();
+        ctx.rect(u * CW - 140, (1 - v) * CH - 92, 280, 184); ctx.clip();
+        ctx.drawImage(patCv, 0, 0); ctx.restore();
+        tex.needsUpdate = true;
+        capCells.forEach(c => { if (c.userData.uv[0] === u && c.userData.uv[1] === v) c.material.opacity = 0; });
+        sfx.stamp();
+        stamped++;
+        pfill.style.width = (stamped / 6) * 100 + '%';
+        cap.userData.target = null;
+        cap.position.y = 0.7;
+        blok.scale.y = 1;
+        capBusy = false;
+        if (stamped === 6) completeLevel();
+      }
+    } else cap.position.y += (0.7 - cap.position.y) * 0.2;
+  }
+  // canting bob
+  if (level === 0) canting.rotation.z = Math.sin(t * 4) * 0.06;
+  renderer.render(scene, camera);
+}
+tick();
+addEventListener('resize', () => {
+  camera.aspect = stageEl.clientWidth / stageEl.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(stageEl.clientWidth, stageEl.clientHeight);
+});
+</script>
+</body>
+</html>

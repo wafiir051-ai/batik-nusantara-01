@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Asal Usul Batik — Video Animasi 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:wght@400;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.184.0/build/three.module.js"
+  },
+  "integrity": {
+    "https://unpkg.com/three@0.184.0/build/three.module.js": "sha384-8FCZ1eVO6it4+pbec2aDtnTrwjWXZLJRC+MAGCIPDgsYnUrl/E0A2YlF8ioMKI/J",
+    "https://unpkg.com/three@0.184.0/build/three.core.js": "sha384-dw2ooPewaEIrAgl6oFDBmmBWCE9oW9LxRGcfwZ0hLvEprzo202wXl7vCYHRlSnOT"
+  }
+}
+</script>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #211910; font-family: 'Alegreya Sans', sans-serif; }
+  #stage { position: fixed; left: 0; right: 0; top: 54px; bottom: 54px; }
+  .bar-top, .bar-bot { position: fixed; left: 0; right: 0; height: 54px; background: #211910; z-index: 8; }
+  .bar-top { top: 0; } .bar-bot { bottom: 0; }
+  #vignette { position: fixed; inset: 0; z-index: 6; pointer-events: none;
+    background: radial-gradient(ellipse 75% 70% at 50% 46%, transparent 58%, rgba(33,25,16,0.55) 100%); }
+  #veil { position: fixed; inset: 0; z-index: 7; pointer-events: none; background: #211910; opacity: 0; }
+  .top { position: fixed; top: 15px; left: 26px; z-index: 10; pointer-events: none; display: flex; align-items: baseline; gap: 14px; }
+  .top .brand { font-family: Marcellus, serif; font-size: 17px; color: #B99C5E; letter-spacing: 0.14em; }
+  #chapter { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: #8A7657; }
+  #titleCard { position: fixed; left: 0; right: 0; top: 42%; transform: translateY(-50%); z-index: 9;
+    text-align: center; pointer-events: none; opacity: 0; }
+  #titleCard .era { font-size: 14px; letter-spacing: 0.34em; text-transform: uppercase; color: #B99C5E; font-weight: 700; }
+  #titleCard .name { font-family: Marcellus, serif; font-size: clamp(40px, 6vw, 72px); color: #F2E9D5; margin-top: 12px;
+    text-shadow: 0 4px 30px rgba(33,25,16,0.6); }
+  #titleCard .rule { width: 70px; height: 2px; background: #B99C5E; margin: 22px auto 0; }
+  #caption { position: fixed; left: 50%; bottom: 132px; transform: translateX(-50%); z-index: 10;
+    max-width: 780px; width: calc(100% - 64px); text-align: center; pointer-events: none; }
+  #caption span { display: inline-block; background: rgba(33,25,16,0.82); color: #F2E9D5; backdrop-filter: blur(4px);
+    font-size: 19px; line-height: 1.5; padding: 10px 24px; border-radius: 6px; opacity: 0; transition: opacity 0.45s;
+    border: 1px solid rgba(185,156,94,0.35); }
+  #bar { position: fixed; left: 0; right: 0; bottom: 54px; height: 5px; background: rgba(242,233,213,0.14); z-index: 10; }
+  #fill { height: 100%; width: 0%; background: #B99C5E; }
+  .tick { position: absolute; top: 0; width: 2px; height: 100%; background: #211910; }
+  #controls { position: fixed; left: 50%; bottom: 9px; transform: translateX(-50%); z-index: 11; display: none; gap: 9px; align-items: center; }
+  #controls button { font-family: 'Alegreya Sans', sans-serif; font-size: 14px; font-weight: 700;
+    border: 1px solid rgba(185,156,94,0.6); background: rgba(43,33,24,0.85); color: #F2E9D5;
+    padding: 8px 20px; border-radius: 999px; cursor: pointer; }
+  #controls button:hover { background: #3a2d1e; }
+  #controls button.primary { background: #B99C5E; border-color: #B99C5E; color: #211910; }
+  #controls button.primary:hover { background: #CBB077; }
+  #overlayStart { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: rgba(33,25,16,0.93); }
+  #overlayStart .card { text-align: center; max-width: 560px; padding: 0 24px; }
+  #overlayStart .kicker { font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #B99C5E; font-weight: 700; }
+  #overlayStart h2 { font-family: Marcellus, serif; font-size: 50px; font-weight: 400; margin: 14px 0 10px; color: #F2E9D5; }
+  #overlayStart p { color: #C9B99A; font-size: 16.5px; line-height: 1.65; margin: 0 0 26px; }
+  #overlayStart button { font-family: 'Alegreya Sans', sans-serif; font-size: 17px; font-weight: 700;
+    background: #B99C5E; color: #211910; border: none; padding: 15px 38px; border-radius: 999px; cursor: pointer; }
+  #overlayStart button:hover { background: #CBB077; }
+  #overlayStart .note { font-size: 13px; color: #8A7657; margin-top: 14px; font-style: italic; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="vignette"></div>
+<div id="veil"></div>
+<div class="bar-top"></div>
+<div class="bar-bot"></div>
+<div class="top"><div class="brand">ASAL USUL BATIK</div><div id="chapter"></div></div>
+<div id="titleCard"><div class="era" id="tcEra"></div><div class="name" id="tcName"></div><div class="rule"></div></div>
+<div id="caption"><span id="capText"></span></div>
+<div id="bar"><div id="fill"></div></div>
+<div id="controls">
+  <button id="btnReplay">&#8634; Ulangi</button>
+  <button id="btnPlay" class="primary">Jeda</button>
+  <button id="btnMute">Suara: Nyala</button>
+  <button id="btnFull">&#x26F6; Layar Penuh</button>
+  <a id="btnHome" href="Batik Nusantara.dc.html" style="text-decoration: none; display: none; font-family: 'Alegreya Sans', sans-serif; font-size: 14px; font-weight: 700; border: 1px solid rgba(185,156,94,0.6); background: rgba(43,33,24,0.85); color: #F2E9D5; padding: 8px 20px; border-radius: 999px;">&larr; Beranda</a>
+</div>
+<div id="overlayStart">
+  <div class="card">
+    <div class="kicker">Kelompok Zenith Dinamika mempersembahkan</div>
+    <h2>Asal Usul Batik</h2>
+    <p>Film animasi 3D dalam enam bab — dari makna kata <em>amba nitik</em>, keraton Mataram, pewarna alam, batik pesisir, canting cap, hingga pengakuan UNESCO. Setiap bab menunggu narasinya selesai, dengan musik bernuansa gamelan (&plusmn;4 menit).</p>
+    <button id="btnStart">&#9654;&nbsp; Putar dengan Suara</button>
+    <div class="note">Narasi memakai suara Bahasa Indonesia paling alami yang tersedia di perangkat Anda.</div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ─────────────── canvas pattern helpers ───────────────
+function parangInto(g, w, h) {
+  g.strokeStyle = '#6B4A1F'; g.lineWidth = 14;
+  for (let i = -h; i < w; i += 46) { g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.stroke(); }
+  g.strokeStyle = 'rgba(107,74,31,0.45)'; g.lineWidth = 5;
+  for (let i = -h + 23; i < w; i += 46) { g.beginPath(); g.moveTo(i, h); g.lineTo(i + h, 0); g.stroke(); }
+}
+function canvasTex(w, h, draw) {
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  draw(cv.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return t;
+}
+const texPolos = canvasTex(512, 512, (g, w, h) => { g.fillStyle = '#F1E6C8'; g.fillRect(0, 0, w, h); });
+const texParang = canvasTex(1024, 640, (g, w, h) => { g.fillStyle = '#EAD9B6'; g.fillRect(0, 0, w, h); parangInto(g, w, h); });
+const texPesisir = canvasTex(1024, 640, (g, w, h) => {
+  g.fillStyle = '#F1DFD2'; g.fillRect(0, 0, w, h);
+  for (let x = 40; x < w; x += 110) for (let y = 44; y < h; y += 100) {
+    g.fillStyle = '#A34A3F';
+    for (let k = 0; k < 6; k++) {
+      const a = k * Math.PI / 3;
+      g.beginPath(); g.ellipse(x + Math.cos(a) * 20, y + Math.sin(a) * 20, 13, 7, a, 0, Math.PI * 2); g.fill();
+    }
+    g.fillStyle = '#44507E'; g.beginPath(); g.arc(x, y, 9, 0, Math.PI * 2); g.fill();
+  }
+});
+const texKawung = canvasTex(1024, 640, (g, w, h) => {
+  g.fillStyle = '#F1E6C8'; g.fillRect(0, 0, w, h);
+  const cell = 56;
+  for (let x = cell / 2; x < w; x += cell) for (let y = cell / 2; y < h; y += cell) {
+    for (const [dx, dy] of [[-12, 0], [12, 0], [0, -12], [0, 12]]) {
+      g.fillStyle = dx === 0 ? '#44507E' : '#6B4A1F';
+      g.beginPath(); g.ellipse(x + dx, y + dy, dx === 0 ? 7 : 11, dx === 0 ? 11 : 7, 0, 0, Math.PI * 2); g.fill();
+    }
+  }
+});
+// layar kapal bergaris terakota
+const texLayar = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = '#F1E6C8'; g.fillRect(0, 0, w, h);
+  g.fillStyle = '#B65C42';
+  g.fillRect(w * 0.18, 0, w * 0.09, h); g.fillRect(w * 0.73, 0, w * 0.09, h);
+  g.fillStyle = 'rgba(107,74,31,0.35)';
+  g.fillRect(0, h * 0.46, w, h * 0.04);
+});
+// progressive "canting sedang menulis" texture (chapter 1)
+const drawCv = document.createElement('canvas'); drawCv.width = 1024; drawCv.height = 640;
+const drawG = drawCv.getContext('2d');
+const drawTex = new THREE.CanvasTexture(drawCv); drawTex.colorSpace = THREE.SRGBColorSpace; drawTex.anisotropy = 8;
+let lastDrawP = -1;
+function paintDraw(p) {
+  if (Math.abs(p - lastDrawP) < 0.008 && p !== 0) return;
+  lastDrawP = p;
+  const w = 1024, h = 640;
+  drawG.fillStyle = '#F1E6C8'; drawG.fillRect(0, 0, w, h);
+  drawG.save(); drawG.beginPath(); drawG.rect(w * (1 - p), 0, w * p, h); drawG.clip(); parangInto(drawG, w, h); drawG.restore();
+  if (p > 0 && p < 1) { drawG.fillStyle = 'rgba(61,46,25,0.8)'; drawG.fillRect(w * (1 - p) - 1, 0, 4, h); }
+  drawTex.needsUpdate = true;
+}
+paintDraw(0);
+// progressive stamped texture (chapter 5)
+const capCv = document.createElement('canvas'); capCv.width = 1024; capCv.height = 512;
+const capG = capCv.getContext('2d');
+const capTex = new THREE.CanvasTexture(capCv); capTex.colorSpace = THREE.SRGBColorSpace; capTex.anisotropy = 8;
+function clearStamps() { capG.fillStyle = '#F1E6C8'; capG.fillRect(0, 0, 1024, 512); capTex.needsUpdate = true; }
+function paintCell(i) {
+  const col = i % 4, row = (i / 4) | 0;
+  capG.save(); capG.beginPath(); capG.rect(col * 256 + 10, row * 256 + 10, 236, 236); capG.clip();
+  parangInto(capG, 1024, 512); capG.restore();
+  capTex.needsUpdate = true;
+}
+clearStamps();
+
+// ─────────────── renderer / scene ───────────────
+const stageEl = document.getElementById('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(stageEl.clientWidth, stageEl.clientHeight);
+stageEl.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#F5EFE2');
+scene.fog = new THREE.Fog('#F5EFE2', 8, 26);
+const camera = new THREE.PerspectiveCamera(44, stageEl.clientWidth / stageEl.clientHeight, 0.1, 60);
+const hemi = new THREE.HemisphereLight(0xfff6e6, 0xb0a184, 1.1);
+scene.add(hemi);
+const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(4, 6, 5); scene.add(key);
+const fill2 = new THREE.DirectionalLight(0xdfe4f2, 0.5); fill2.position.set(-5, -1, -4); scene.add(fill2);
+
+const M = {
+  kayu: new THREE.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.7 }),
+  kayuTua: new THREE.MeshStandardMaterial({ color: 0x5e3d1c, roughness: 0.8 }),
+  tembaga: new THREE.MeshStandardMaterial({ color: 0xc47f35, roughness: 0.35, metalness: 0.35 }),
+  malam: new THREE.MeshStandardMaterial({ color: 0x3d2e19, roughness: 0.5 }),
+  nila: new THREE.MeshStandardMaterial({ color: 0x2f3a63, roughness: 0.4 }),
+  soga: new THREE.MeshStandardMaterial({ color: 0x6b4a1f, roughness: 0.5 }),
+  emas: new THREE.MeshStandardMaterial({ color: 0xb99c5e, roughness: 0.3, metalness: 0.5 }),
+  bara: new THREE.MeshStandardMaterial({ color: 0xff8a3c, emissive: 0xff5a1f, emissiveIntensity: 1.4, roughness: 0.6 }),
+  lampion: new THREE.MeshStandardMaterial({ color: 0xffc987, emissive: 0xffa64d, emissiveIntensity: 1.1, roughness: 0.6 }),
+  atap: new THREE.MeshStandardMaterial({ color: 0x7a2e2e, roughness: 0.8 }),
+  dinding: new THREE.MeshStandardMaterial({ color: 0xead9b6, roughness: 0.9 }),
+  laut: new THREE.MeshStandardMaterial({ color: 0x2e6b5e, roughness: 0.35, metalness: 0.1, transparent: true, opacity: 0.92 }),
+  layar: new THREE.MeshStandardMaterial({ map: texLayar, color: 0xffffff, roughness: 0.9, side: THREE.DoubleSide }),
+  bendera: new THREE.MeshStandardMaterial({ color: 0xa34a3f, roughness: 0.8, side: THREE.DoubleSide }),
+  kulit: new THREE.MeshStandardMaterial({ color: 0xc68b59, roughness: 0.85 }),
+  rambut: new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 0.6 }),
+  kebaya: new THREE.MeshStandardMaterial({ color: 0x7a2e3b, roughness: 0.8 })
+};
+function clothMesh(tex, w = 2.6, h = 1.6, segs = 100) {
+  const g = new THREE.PlaneGeometry(w, h, segs, Math.round(segs * h / w));
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, side: THREE.DoubleSide, roughness: 0.9 }));
+  m.userData.base = g.attributes.position.array.slice();
+  return m;
+}
+function waveCloth(mesh, t, amp = 1) {
+  const pos = mesh.geometry.attributes.position, base = mesh.userData.base;
+  for (let i = 0; i < pos.count; i++) {
+    const x = base[i * 3], y = base[i * 3 + 1];
+    pos.array[i * 3 + 2] = amp * (0.09 * Math.sin(x * 2 + t * 1.2) + 0.05 * Math.sin(y * 3 + t * 1.7));
+  }
+  pos.needsUpdate = true;
+  mesh.geometry.computeVertexNormals();
+}
+
+const GAP = 18;
+function chapterGroup(i) { const g = new THREE.Group(); g.position.x = i * GAP; scene.add(g); return g; }
+
+// ── Bab 1: canting menulis di kain (motif muncul mengikuti narasi) ──
+const g0 = chapterGroup(0);
+const cloth0 = clothMesh(drawTex, 2.4, 1.5); cloth0.rotation.x = -0.12; g0.add(cloth0);
+const canting0 = new THREE.Group();
+const gagang = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.038, 0.6, 24), M.kayu);
+gagang.rotation.z = Math.PI / 2.4; canting0.add(gagang);
+const mangkuk = new THREE.Mesh(new THREE.SphereGeometry(0.085, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.62), M.tembaga);
+mangkuk.position.set(0.26, -0.12, 0); canting0.add(mangkuk);
+const cucuk = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.014, 0.16, 12), M.tembaga);
+cucuk.rotation.z = 1.1; cucuk.position.set(0.38, -0.16, 0); canting0.add(cucuk);
+canting0.scale.setScalar(0.55);
+const tetes = new THREE.Mesh(new THREE.SphereGeometry(0.022, 12, 12), M.malam);
+tetes.material = M.malam.clone(); tetes.material.transparent = true; g0.add(tetes);
+// tikar + gawangan penyangga kain
+const tikar = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.02, 2.3), new THREE.MeshStandardMaterial({ color: 0xd9b87c, roughness: 0.95 }));
+tikar.position.y = -1.0; g0.add(tikar);
+for (const sx of [-1.28, 1.28]) {
+  const post = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 1.8, 12), M.kayu);
+  post.position.set(sx, -0.1, -0.04); g0.add(post);
+}
+const palang = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 2.7, 12), M.kayu);
+palang.rotation.z = Math.PI / 2; palang.position.set(0, 0.79, -0.04); g0.add(palang);
+// pembatik duduk menulis dengan canting
+const pembatik = new THREE.Group();
+const dingklik = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.12, 0.28), M.kayuTua);
+dingklik.position.y = 0.06; pembatik.add(dingklik);
+const matKawungKecil = new THREE.MeshStandardMaterial({ map: texKawung, roughness: 0.9 });
+const rok = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.42), matKawungKecil);
+rok.position.set(0, 0.27, 0.06); pembatik.add(rok);
+const lutut = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.14, 0.3), matKawungKecil);
+lutut.position.set(0, 0.19, 0.32); pembatik.add(lutut);
+const pTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.16, 0.44, 20), M.kebaya);
+pTorso.position.y = 0.62; pTorso.rotation.x = 0.1; pembatik.add(pTorso);
+const pKepala = new THREE.Group();
+const muka = new THREE.Mesh(new THREE.SphereGeometry(0.105, 20, 16), M.kulit); pKepala.add(muka);
+const rambutP = new THREE.Mesh(new THREE.SphereGeometry(0.108, 20, 16), M.rambut);
+rambutP.position.set(0, 0.02, -0.03); pKepala.add(rambutP);
+const sanggul = new THREE.Mesh(new THREE.SphereGeometry(0.06, 14, 12), M.rambut);
+sanggul.position.set(0, 0.03, -0.12); pKepala.add(sanggul);
+pKepala.position.set(0, 0.95, 0.02); pKepala.rotation.x = 0.16; pembatik.add(pKepala);
+const lenganKiri = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.34, 12), M.kebaya);
+lenganKiri.position.set(-0.16, 0.68, 0.14); lenganKiri.rotation.x = -1.1; lenganKiri.rotation.z = 0.35; pembatik.add(lenganKiri);
+const pArmR = new THREE.Group();
+const lenganKanan = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.36, 12), M.kebaya);
+lenganKanan.rotation.x = Math.PI / 2; lenganKanan.position.z = 0.18; pArmR.add(lenganKanan);
+const pHand = new THREE.Group();
+const telapak = new THREE.Mesh(new THREE.SphereGeometry(0.042, 12, 10), M.kulit); pHand.add(telapak);
+pHand.position.z = 0.38; pArmR.add(pHand);
+pHand.add(canting0);
+canting0.position.set(0.01, 0.04, 0.04); canting0.rotation.set(0.25, Math.PI / 2, -0.5);
+pArmR.position.set(0.16, 0.78, 0.08); pembatik.add(pArmR);
+pembatik.position.set(0.85, -0.99, 0.62); pembatik.rotation.y = Math.PI + 0.35; g0.add(pembatik);
+// anglo + wajan malam dengan bara menyala
+const anglo = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.36, 0.3, 24), new THREE.MeshStandardMaterial({ color: 0x9c5b33, roughness: 0.9 }));
+anglo.position.set(1.7, -0.85, 0.2); g0.add(anglo);
+const bara = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.06, 24), M.bara);
+bara.position.set(1.7, -0.68, 0.2); g0.add(bara);
+const wajan = new THREE.Mesh(new THREE.LatheGeometry(
+  Array.from({ length: 9 }, (_, i) => new THREE.Vector2(0.05 + (i / 8) * 0.26, (i / 8) * (i / 8) * 0.16)), 36), M.kayuTua);
+wajan.position.set(1.7, -0.62, 0.2); g0.add(wajan);
+const isiMalam = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.03, 32), M.malam);
+isiMalam.position.set(1.7, -0.5, 0.2); g0.add(isiMalam);
+const apiLight = new THREE.PointLight(0xff8a3c, 2.2, 3.5); apiLight.position.set(1.7, -0.45, 0.35); g0.add(apiLight);
+
+// ── Bab 2: gapura keraton + kain kawung + lampion ──
+const g1 = chapterGroup(1);
+const alas = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.18, 2), M.kayuTua); alas.position.y = -1.1; g1.add(alas);
+const undak = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.14, 1.5), M.kayu); undak.position.y = -0.96; g1.add(undak);
+const karpet = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.03, 0.85), new THREE.MeshStandardMaterial({ color: 0x8e3b2f, roughness: 0.9 }));
+karpet.position.set(0, -0.875, 0.28); g1.add(karpet);
+for (const sx of [-1.35, 1.35]) {
+  const tiang = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.13, 2.1, 20), M.dinding);
+  tiang.position.set(sx, 0, 0); g1.add(tiang);
+  const kepala = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.14, 0.36), M.emas);
+  kepala.position.set(sx, 1.08, 0); g1.add(kepala);
+  const lampion = new THREE.Mesh(new THREE.SphereGeometry(0.09, 18, 14), M.lampion);
+  lampion.position.set(sx, 0.62, 0.42); g1.add(lampion);
+  const talil = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.3, 8), M.kayuTua);
+  talil.position.set(sx, 0.82, 0.42); g1.add(talil);
+}
+const atap = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 1.9, 0.7, 4), M.atap);
+atap.rotation.y = Math.PI / 4; atap.scale.z = 0.62; atap.position.y = 1.55; g1.add(atap);
+const mustaka = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), M.emas);
+mustaka.position.y = 1.95; g1.add(mustaka);
+const cloth1 = clothMesh(texKawung, 1.7, 1.15); cloth1.position.set(-0.5, 0.02, 0); g1.add(cloth1);
+// sang raja berdiri di depan gapura
+const raja = new THREE.Group();
+const sarung = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 0.56, 20), new THREE.MeshStandardMaterial({ map: texKawung, roughness: 0.85 }));
+sarung.position.y = 0.28; raja.add(sarung);
+const rTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.145, 0.16, 0.46, 20), M.nila);
+rTorso.position.y = 0.78; raja.add(rTorso);
+const sabuk = new THREE.Mesh(new THREE.CylinderGeometry(0.165, 0.165, 0.06, 20), M.emas);
+sabuk.position.y = 0.57; raja.add(sabuk);
+const selempang = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.5, 0.02), M.emas);
+selempang.position.set(0.02, 0.8, 0.15); selempang.rotation.z = 0.55; raja.add(selempang);
+const rKepala = new THREE.Group();
+const rMuka = new THREE.Mesh(new THREE.SphereGeometry(0.115, 20, 16), M.kulit); rKepala.add(rMuka);
+const mahkota = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.1, 20), M.emas);
+mahkota.position.y = 0.12; rKepala.add(mahkota);
+const puncakM = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.1, 16), M.emas);
+puncakM.position.y = 0.22; rKepala.add(puncakM);
+rKepala.position.y = 1.16; raja.add(rKepala);
+for (const s of [-1, 1]) {
+  const bahu = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 10), M.nila);
+  bahu.position.set(0.17 * s, 0.96, 0); raja.add(bahu);
+  const lengan = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.03, 0.42, 12), M.nila);
+  lengan.position.set(0.19 * s, 0.72, 0.01); lengan.rotation.z = -0.12 * s; raja.add(lengan);
+}
+const tanganR = new THREE.Mesh(new THREE.SphereGeometry(0.045, 12, 10), M.kulit);
+tanganR.position.set(0.23, 0.5, 0.02); raja.add(tanganR);
+const tongkat = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.018, 1.0, 12), M.emas);
+tongkat.position.set(0.25, 0.5, 0.04); raja.add(tongkat);
+const cape = clothMesh(texParang, 0.55, 0.85, 24);
+cape.position.set(0, 0.72, -0.19); raja.add(cape);
+raja.position.set(0.78, -0.89, 0.4); raja.rotation.y = -0.2; g1.add(raja);
+
+// ── Bab 3: pewarna alam — tong nila & soga, kain dicelup ──
+const g2 = chapterGroup(2);
+const mejaD = new THREE.Mesh(new THREE.BoxGeometry(3.4, 0.14, 2), M.kayuTua); mejaD.position.y = -1.15; g2.add(mejaD);
+function tong(x, liquidMat) {
+  const grp = new THREE.Group();
+  const badan = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.4, 0.85, 28), M.kayu);
+  grp.add(badan);
+  for (const ry of [-0.25, 0.1]) {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.485 + ry * 0.12, 0.02, 10, 40), M.tembaga);
+    ring.rotation.x = Math.PI / 2; ring.position.y = ry; grp.add(ring);
+  }
+  const cair = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.46, 0.04, 28), liquidMat);
+  cair.position.y = 0.42; grp.add(cair);
+  grp.position.set(x, -0.65, 0); g2.add(grp);
+  return grp;
+}
+tong(-0.85, M.nila);
+tong(0.85, M.soga);
+const celup = clothMesh(texPolos, 0.7, 1.3, 40);
+celup.position.set(-0.85, 0.55, 0); g2.add(celup);
+const celupWarna = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.5), new THREE.MeshStandardMaterial({ color: 0x2f3a63, side: THREE.DoubleSide, roughness: 0.9 }));
+celupWarna.position.set(-0.85, 0.02, 0.002); g2.add(celupWarna);
+// jemuran kain hasil celup
+const jemur = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 3, 10), M.kayu);
+jemur.rotation.z = Math.PI / 2; jemur.position.set(0, 1.15, -0.9); g2.add(jemur);
+const hasil1 = clothMesh(texPolos, 0.8, 1, 30); hasil1.material = new THREE.MeshStandardMaterial({ color: 0x2f3a63, side: THREE.DoubleSide, roughness: 0.9 });
+hasil1.position.set(-0.7, 0.65, -0.9); g2.add(hasil1);
+const hasil2 = clothMesh(texPolos, 0.8, 1, 30); hasil2.material = new THREE.MeshStandardMaterial({ color: 0x6b4a1f, side: THREE.DoubleSide, roughness: 0.9 });
+hasil2.position.set(0.7, 0.65, -0.9); g2.add(hasil2);
+
+// ── Bab 4: pesisir — laut, kapal dagang, kain pesisir ──
+const g3 = chapterGroup(3);
+const sea = new THREE.Mesh(new THREE.PlaneGeometry(9, 6, 60, 40), M.laut);
+sea.rotation.x = -Math.PI / 2; sea.position.y = -1.15;
+sea.userData.base = sea.geometry.attributes.position.array.slice(); g3.add(sea);
+const kapal = new THREE.Group();
+const lambung = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.28, 2.2, 8, 1, false, 0, Math.PI), M.kayuTua);
+lambung.rotation.set(Math.PI / 2, 0, Math.PI / 2); lambung.scale.y = 0.8; kapal.add(lambung);
+const tiangK = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.045, 1.7, 12), M.kayu);
+tiangK.position.y = 0.85; kapal.add(tiangK);
+const layar = new THREE.Mesh(new THREE.PlaneGeometry(1.15, 1.1, 24, 20), M.layar);
+layar.userData.base = layar.geometry.attributes.position.array.slice();
+layar.position.set(0.06, 0.95, 0); kapal.add(layar);
+const bendera = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.18, 12, 4), M.bendera);
+bendera.userData.base = bendera.geometry.attributes.position.array.slice();
+bendera.position.set(0.17, 1.75, 0); kapal.add(bendera);
+kapal.position.set(1.5, -0.75, -0.6); kapal.rotation.y = -0.5; g3.add(kapal);
+const kapal2 = kapal.clone(); kapal2.scale.setScalar(0.55); kapal2.position.set(-2.4, -0.85, -2.2); kapal2.rotation.y = 0.4; g3.add(kapal2);
+const cloth2 = clothMesh(texPesisir, 2.2, 1.4); cloth2.position.set(-1.05, 0.25, 0.5); cloth2.rotation.y = 0.25; g3.add(cloth2);
+// penyangga jemuran kain di tepi pantai
+const jemurP = new THREE.Group();
+for (const sx of [-1.18, 1.18]) {
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.045, 2.4, 12), M.kayu);
+  pole.position.set(sx, -0.2, 0); jemurP.add(pole);
+}
+const barJ = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.026, 2.55, 12), M.kayu);
+barJ.rotation.z = Math.PI / 2; barJ.position.y = 0.97; jemurP.add(barJ);
+jemurP.position.set(-1.05, 0, 0.5); jemurP.rotation.y = 0.25; g3.add(jemurP);
+
+// ── Bab 5: canting cap — stempel tembaga mengecap kain ──
+const g4 = chapterGroup(4);
+const meja = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.14, 1.9), M.kayu); meja.position.y = -0.65; g4.add(meja);
+const kaki1 = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.5, 1.7), M.kayuTua); kaki1.position.set(-1.4, -0.95, 0); g4.add(kaki1);
+const kaki2 = kaki1.clone(); kaki2.position.x = 1.4; g4.add(kaki2);
+const kain3 = clothMesh(capTex, 2.7, 1.35, 60);
+kain3.rotation.x = -Math.PI / 2; kain3.position.y = -0.56; g4.add(kain3);
+const cap = new THREE.Group();
+const capBlok = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.6), M.tembaga); cap.add(capBlok);
+for (let i = 0; i < 5; i++) {
+  const sirip = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.1, 0.03), M.tembaga);
+  sirip.position.set(0, -0.1, -0.2 + i * 0.1); sirip.rotation.y = 0.5; cap.add(sirip);
+}
+const pegangan = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.35, 12), M.kayuTua);
+pegangan.position.y = 0.25; cap.add(pegangan);
+cap.position.set(-0.99, 0.4, -0.34); g4.add(cap);
+
+// ── Bab 6: dunia — globe, pita kain mengorbit, kelopak emas ──
+const g5 = chapterGroup(5);
+const globe = new THREE.Mesh(new THREE.SphereGeometry(1.05, 48, 32), new THREE.MeshStandardMaterial({
+  map: canvasTex(1024, 512, (g, w, h) => {
+    g.fillStyle = '#BFD5DC'; g.fillRect(0, 0, w, h);
+    g.fillStyle = '#9CB98B';
+    for (const [x, y, r] of [[190, 160, 80], [300, 300, 70], [520, 190, 95], [660, 300, 60], [800, 220, 85], [420, 120, 50]]) {
+      g.beginPath(); g.ellipse(x, y, r * 1.4, r * 0.8, 0.4, 0, Math.PI * 2); g.fill();
+    }
+    g.fillStyle = '#7A5427';
+    for (let i = 0; i < 9; i++) { g.beginPath(); g.arc(700 + i * 22, 285 + (i % 3) * 10, 7, 0, Math.PI * 2); g.fill(); }
+  }), roughness: 0.7
+})); g5.add(globe);
+const pita = clothMesh(texKawung, 3.4, 0.32, 120); g5.add(pita);
+const bintang = [];
+for (let i = 0; i < 14; i++) {
+  const b = new THREE.Mesh(new THREE.SphereGeometry(0.035, 10, 10), M.emas);
+  const a = (i / 14) * Math.PI * 2;
+  b.position.set(Math.cos(a) * 1.85, Math.sin(a * 2) * 0.5, Math.sin(a) * 1.85);
+  g5.add(b); bintang.push(b);
+}
+const kelopak = [];
+const kelopakMats = [M.emas, M.soga, M.bendera];
+for (let i = 0; i < 24; i++) {
+  const k = new THREE.Mesh(new THREE.PlaneGeometry(0.07, 0.14), kelopakMats[i % 3]);
+  g5.add(k); kelopak.push(k);
+}
+
+// debu emas melayang di seluruh panggung
+const dustGeo = new THREE.BufferGeometry();
+{
+  const n = 260, arr = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    arr[i * 3] = -4 + Math.random() * (5 * GAP + 8);
+    arr[i * 3 + 1] = -1.6 + Math.random() * 3.8;
+    arr[i * 3 + 2] = -3 + Math.random() * 5;
+  }
+  dustGeo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+}
+const dustSprite = canvasTex(64, 64, (g) => {
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 30);
+  gr.addColorStop(0, 'rgba(255,236,190,1)'); gr.addColorStop(1, 'rgba(255,236,190,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+});
+const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({
+  size: 0.055, map: dustSprite, transparent: true, opacity: 0.55, color: 0xB99C5E, depthWrite: false
+}));
+scene.add(dust);
+
+// ─────────────── chapters / narration ───────────────
+const CHAPTERS = [
+  { t: 22, label: 'Bab 1 · Amba Nitik', title: 'Amba · Nitik', era: 'Awal Mula',
+    cap: 'Kata \u201cbatik\u201d berasal dari bahasa Jawa: amba (menulis) dan nitik (membuat titik) — menulis titik demi titik dengan malam panas.',
+    nar: 'Asal usul batik dimulai dari sebuah kata. Batik berasal dari bahasa Jawa: amba yang berarti menulis, dan nitik yang berarti membuat titik. Maka batik adalah menulis titik demi titik di atas kain, memakai malam, lilin panas yang dituangkan lewat canting. Bagian kain yang tertutup lilin akan menolak warna saat dicelup. Teknik rintang lilin seperti ini sudah dikenal di berbagai belahan dunia sejak ribuan tahun lalu, dari Mesir hingga Tiongkok. Namun di tanah Jawa, teknik itu tumbuh menjadi seni yang paling halus dan paling kaya makna. Relief candi dan arca kuno, seperti arca Prajnaparamita dari abad ketiga belas, telah menampilkan busana berhias pola rumit yang menyerupai batik.' },
+  { t: 24, label: 'Bab 2 · Keraton Mataram', title: 'Keraton Mataram', era: 'Abad ke-17',
+    cap: 'Di keraton Yogyakarta dan Surakarta, batik menjadi busana raja. Parang dan Kawung menjadi motif larangan.',
+    nar: 'Batik mencapai puncaknya di balik tembok keraton Jawa, terutama pada masa Kesultanan Mataram, lalu diteruskan keraton Yogyakarta dan Surakarta. Di sana membatik menjadi laku spiritual: para putri dan abdi dalem membatik sambil berpuasa dan berdoa, sebab selembar kain bisa memakan waktu berbulan-bulan. Lahirlah motif-motif larangan yang hanya boleh dikenakan raja dan kerabatnya. Parang, deretan huruf S seperti ombak yang tak pernah berhenti, melambangkan keteguhan. Kawung, empat lingkaran seperti irisan buah aren, melambangkan kesucian dan pengendalian diri. Setiap garis adalah doa, setiap pola adalah falsafah hidup.' },
+  { t: 20, label: 'Bab 3 · Pewarna Alam', title: 'Pewarna Alam', era: 'Nila & Soga',
+    cap: 'Warna batik klasik lahir dari alam: biru dari daun nila (indigo), cokelat soga dari kulit kayu.',
+    nar: 'Warna-warna batik klasik lahir dari alam. Biru tua diperoleh dari daun tanaman nila yang difermentasi berhari-hari dalam tong. Cokelat khas keraton, yang disebut soga, berasal dari kulit kayu pohon soga, tingi, dan tegeran. Kain dicelup, dijemur, lalu dicelup lagi, berulang puluhan kali hingga warnanya dalam dan hidup. Karena itu batik tulis halus bisa membutuhkan waktu hingga setengah tahun. Di Madura, kain bahkan direndam berbulan-bulan dalam gentong tanah, sehingga disebut batik gentongan.' },
+  { t: 22, label: 'Bab 4 · Pesisir & Perdagangan', title: 'Pesisir & Niaga', era: 'Abad ke-17–19',
+    cap: 'Di Pekalongan, Lasem, dan Cirebon, pengaruh Tiongkok, Arab, India, dan Eropa melahirkan batik pesisir.',
+    nar: 'Sementara keraton menjaga pakem, kota-kota pelabuhan membuka pintu. Di Pekalongan, Lasem, Cirebon, dan Madura, kapal dagang datang membawa kain patola dari Gujarat, keramik dan lukisan awan dari Tiongkok, serta selera bunga dari Eropa. Semua berpadu di tangan pembatik lokal. Lahirlah batik pesisir yang cerah: Mega Mendung di Cirebon yang terinspirasi seni Tiongkok, batik Tiga Negeri yang konon diwarnai di tiga kota, dan buketan bergaya Eropa dari Pekalongan. Batik menjadi bukti bahwa budaya Nusantara tumbuh justru karena terbuka pada dunia.' },
+  { t: 18, label: 'Bab 5 · Canting Cap', title: 'Canting Cap', era: 'Tahun 1840-an',
+    cap: 'Canting cap tembaga ditemukan — produksi meluas dari keraton ke rakyat.',
+    nar: 'Pada pertengahan abad kesembilan belas, sekitar tahun seribu delapan ratus empat puluhan, para perajin menemukan canting cap: stempel dari lempeng tembaga yang dicelupkan ke malam panas lalu dicapkan ke kain. Pekerjaan yang tadinya berbulan-bulan kini selesai dalam hitungan hari. Harga batik pun turun, dan batik menyebar dari keraton ke rumah-rumah rakyat, menjadi pakaian sehari-hari, dari pasar hingga upacara. Batik tulis dan batik cap hidup berdampingan hingga hari ini.' },
+  { t: 20, label: 'Bab 6 · Warisan Dunia', title: 'Warisan Dunia', era: '2 Oktober 2009',
+    cap: '2 Oktober 2009 — UNESCO menetapkan Batik Indonesia sebagai Warisan Budaya Takbenda Kemanusiaan.',
+    nar: 'Pada tanggal dua Oktober dua ribu sembilan, UNESCO menetapkan Batik Indonesia sebagai Warisan Budaya Takbenda Kemanusiaan. Yang diakui bukan sekadar kainnya, melainkan seluruh pengetahuannya: teknik, simbol, dan budayanya yang menyertai orang Indonesia dari lahir hingga akhir hayat. Kini setiap tanggal dua Oktober kita merayakan Hari Batik Nasional. Selembar kain, seribu makna, dari Nusantara untuk dunia.' }
+];
+const TOTAL = CHAPTERS.reduce((s, c) => s + c.t, 0);
+const CHS = []; { let a = 0; for (const c of CHAPTERS) { CHS.push(a); a += c.t; } }
+const CAMS = [
+  { h: 0.5, d: 4.4, o: 0.6 }, { h: 0.75, d: 5.3, o: -0.7 }, { h: 0.85, d: 4.7, o: 0.6 },
+  { h: 0.7, d: 5.5, o: -0.85 }, { h: 0.95, d: 4.5, o: 0.7 }, { h: 0.75, d: 5.6, o: -0.9 }
+];
+// mood warna per bab: langit, kabut, dan cahaya
+const MOOD = [
+  { bg: 0xf2ddab, hemi: 0xffe9c4, keyC: 0xffd9a0, keyI: 1.7 },
+  { bg: 0xead0a0, hemi: 0xffedc9, keyC: 0xffcf8f, keyI: 1.65 },
+  { bg: 0xd7dde8, hemi: 0xe8eef7, keyC: 0xdfe8ff, keyI: 1.5 },
+  { bg: 0xcfe3dc, hemi: 0xeaf3ec, keyC: 0xfff3d6, keyI: 1.6 },
+  { bg: 0xecd9b2, hemi: 0xfff0d2, keyC: 0xffdda6, keyI: 1.7 },
+  { bg: 0xf0dfba, hemi: 0xfff2d8, keyC: 0xffd490, keyI: 1.85 }
+];
+const _c1 = new THREE.Color(), _c2 = new THREE.Color(), _c3 = new THREE.Color();
+function applyMood(i, a) {
+  const m = MOOD[i];
+  scene.background.lerp(_c1.set(m.bg), a);
+  scene.fog.color.copy(scene.background);
+  hemi.color.lerp(_c2.set(m.hemi), a);
+  key.color.lerp(_c3.set(m.keyC), a);
+  key.intensity += (m.keyI - key.intensity) * a;
+}
+// chapter tick marks on progress bar
+{
+  const bar = document.getElementById('bar');
+  let acc = 0;
+  for (let i = 0; i < CHAPTERS.length - 1; i++) {
+    acc += CHAPTERS[i].t;
+    const d = document.createElement('div');
+    d.className = 'tick'; d.style.left = (acc / TOTAL * 100) + '%';
+    bar.appendChild(d);
+  }
+}
+
+// ─────────────── musik gamelan (WebAudio) ───────────────
+let actx = null, masterGain = null, muted = false, musicTimer = null;
+const SLENDRO = [261.6, 293.7, 329.6, 392.0, 440.0];
+function startMusic() {
+  actx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = actx.createGain(); masterGain.gain.value = 0.12; masterGain.connect(actx.destination);
+  let step = 0;
+  function pluck() {
+    if (!actx) return;
+    const now = actx.currentTime;
+    if (step % 16 === 0) { // gong ageng
+      const og = actx.createOscillator(), gg = actx.createGain();
+      og.type = 'sine'; og.frequency.value = 65.4;
+      og.connect(gg); gg.connect(masterGain);
+      gg.gain.setValueAtTime(0.0001, now);
+      gg.gain.exponentialRampToValueAtTime(0.8, now + 0.04);
+      gg.gain.exponentialRampToValueAtTime(0.0001, now + 3.4);
+      og.start(now); og.stop(now + 3.5);
+    }
+    const f = SLENDRO[[0, 2, 4, 3, 1, 3, 2, 0][step % 8]] * (step % 16 < 8 ? 1 : 0.5);
+    const o = actx.createOscillator(), gn = actx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    const o2 = actx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = f * 2.01;
+    const g2 = actx.createGain(); g2.gain.value = 0.25;
+    o.connect(gn); o2.connect(g2); g2.connect(gn); gn.connect(masterGain);
+    gn.gain.setValueAtTime(0.0001, now);
+    gn.gain.exponentialRampToValueAtTime(0.5, now + 0.02);
+    gn.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+    o.start(now); o2.start(now); o.stop(now + 1.7); o2.stop(now + 1.7);
+    step++;
+    musicTimer = setTimeout(pluck, 620);
+  }
+  pluck();
+}
+
+// ─────────────── narasi: suara paling alami yang tersedia ───────────────
+let voice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  const pool = vs.filter(v => v.lang && v.lang.toLowerCase().startsWith('id'));
+  const fallback = vs.filter(v => v.lang && v.lang.toLowerCase().startsWith('ms'));
+  const score = v =>
+    (/natural|neural|online/i.test(v.name) ? 8 : 0) +
+    (/google/i.test(v.name) ? 5 : 0) +
+    (/ardi|gadis|damayanti|andika/i.test(v.name) ? 3 : 0) +
+    (v.localService ? 0 : 1);
+  voice = pool.sort((a, b) => score(b) - score(a))[0] || fallback.sort((a, b) => score(b) - score(a))[0] || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+let speakSession = 0, pendingNext = null, narrActive = false;
+function speak(text) {
+  if (!('speechSynthesis' in window) || muted) { narrActive = false; return; }
+  speechSynthesis.cancel();
+  const session = ++speakSession;
+  const sentences = text.match(/[^.!?:]+[.!?:]+/g) || [text];
+  let i = 0;
+  narrActive = true;
+  function next() {
+    if (session !== speakSession || muted) { if (session === speakSession) narrActive = false; return; }
+    if (i >= sentences.length) { narrActive = false; return; }
+    if (!playing) { pendingNext = next; return; }
+    capEl.textContent = sentences[i].trim(); // subtitle = kalimat yang sedang diucapkan
+    const u = new SpeechSynthesisUtterance(sentences[i].trim());
+    if (voice) u.voice = voice;
+    u.lang = 'id-ID';
+    u.rate = 0.93 + (i % 3) * 0.02; // variasi tempo tipis agar tak monoton
+    u.pitch = 1.02;
+    i++;
+    u.onend = () => setTimeout(next, i % 4 === 0 ? 420 : 240); // jeda napas
+    speechSynthesis.speak(u);
+  }
+  next();
+}
+
+// ─────────────── playback ───────────────
+let playing = false, tGlobal = 0, lastChapter = -1, lastK = -1, chapterSpokeAt = 0;
+const capEl = document.getElementById('capText');
+const chapEl = document.getElementById('chapter');
+const fillEl = document.getElementById('fill');
+const veilEl = document.getElementById('veil');
+const titleEl = document.getElementById('titleCard');
+const tcEra = document.getElementById('tcEra');
+const tcName = document.getElementById('tcName');
+const btnPlay = document.getElementById('btnPlay');
+const btnMute = document.getElementById('btnMute');
+const clamp01 = (x) => Math.max(0, Math.min(1, x));
+const easeIO = (x) => x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+
+function chapterAt(t) {
+  let acc = 0;
+  for (let i = 0; i < CHAPTERS.length; i++) {
+    if (t < acc + CHAPTERS[i].t) return { i, local: (t - acc) / CHAPTERS[i].t };
+    acc += CHAPTERS[i].t;
+  }
+  return { i: CHAPTERS.length - 1, local: 1 };
+}
+function setChapter(i) {
+  lastChapter = i;
+  chapterSpokeAt = performance.now() / 1000;
+  const c = CHAPTERS[i];
+  chapEl.textContent = c.label;
+  capEl.textContent = (muted || !('speechSynthesis' in window)) ? c.cap : '';
+  tcEra.textContent = c.era;
+  tcName.textContent = c.title;
+  speak(c.nar);
+}
+document.getElementById('btnStart').onclick = () => {
+  document.getElementById('overlayStart').style.display = 'none';
+  document.getElementById('controls').style.display = 'flex';
+  startMusic();
+  playing = true;
+  clock.start();
+};
+btnPlay.onclick = () => {
+  playing = !playing;
+  btnPlay.textContent = playing ? 'Jeda' : 'Putar';
+  if ('speechSynthesis' in window) {
+    if (playing) { speechSynthesis.resume(); if (pendingNext) { const f = pendingNext; pendingNext = null; f(); } }
+    else speechSynthesis.pause();
+  }
+  if (actx) playing ? actx.resume() : actx.suspend();
+};
+document.getElementById('btnReplay').onclick = () => {
+  tGlobal = 0; lastChapter = -1; lastK = -1; clearStamps(); paintDraw(0);
+  playing = true; btnPlay.textContent = 'Jeda';
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+};
+btnMute.onclick = () => {
+  muted = !muted;
+  btnMute.textContent = muted ? 'Suara: Mati' : 'Suara: Nyala';
+  if (muted) {
+    narrActive = false;
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    if (lastChapter >= 0) capEl.textContent = CHAPTERS[lastChapter].cap;
+  }
+};
+const btnFull = document.getElementById('btnFull');
+if (!new URLSearchParams(location.search).has('embed')) document.getElementById('btnHome').style.display = 'inline-block';
+btnFull.onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen();
+};
+document.addEventListener('fullscreenchange', () => {
+  btnFull.innerHTML = document.fullscreenElement ? '&#x26F6; Keluar' : '&#x26F6; Layar Penuh';
+});
+// debug/seek hook
+window.__seek = (s) => {
+  document.getElementById('overlayStart').style.display = 'none';
+  muted = true; narrActive = false; playing = false; tGlobal = s; lastChapter = -1;
+  applyMood(chapterAt(s).i, 1);
+  frame(0); frame(0);
+};
+
+// ─────────────── main loop ───────────────
+const clock = new THREE.Clock(false);
+const tipPos = new THREE.Vector3();
+function tick() {
+  requestAnimationFrame(tick);
+  frame(clock.running ? clock.getDelta() : 0);
+}
+function frame(dt) {
+  if (playing) {
+    tGlobal = Math.min(tGlobal + dt, TOTAL);
+    // tahan akhir bab sampai narasi bab itu selesai dibacakan (sinkron suara–visual)
+    const ca = chapterAt(tGlobal);
+    const holdAt = CHS[ca.i] + CHAPTERS[ca.i].t * 0.9;
+    const heldTooLong = performance.now() / 1000 - chapterSpokeAt > 80;
+    if (narrActive && !heldTooLong && tGlobal > holdAt) tGlobal = holdAt;
+  }
+  const { i, local } = chapterAt(tGlobal);
+  if (i !== lastChapter) setChapter(i);
+  if (tGlobal >= TOTAL && playing) { playing = false; btnPlay.textContent = 'Putar'; }
+  fillEl.style.width = (tGlobal / TOTAL * 100) + '%';
+  // ducking musik saat narasi berbicara
+  if (masterGain) masterGain.gain.value = muted ? 0 : (('speechSynthesis' in window) && speechSynthesis.speaking ? 0.065 : 0.13);
+  // kartu judul bab, caption, dan transisi gelap
+  const tIn = clamp01((local - 0.015) / 0.05), tOut = 1 - clamp01((local - 0.15) / 0.06);
+  titleEl.style.opacity = Math.min(tIn, tOut);
+  capEl.style.opacity = narrActive ? (local < 0.97 ? 1 : 0)
+    : ((muted || !('speechSynthesis' in window)) && local > 0.12 && local < 0.92 ? 1 : 0);
+  veilEl.style.opacity = Math.max(clamp01(1 - local / 0.08), clamp01((local - 0.94) / 0.05)) * 0.92;
+
+  const t = performance.now() / 1000;
+  // kamera sinematik per bab
+  const cfg = CAMS[i];
+  applyMood(i, 0.035);
+  const targetX = i * GAP, fromX = i === 0 ? 0 : (i - 1) * GAP;
+  const e = easeIO(Math.min(local * 14, 1));
+  const cx = fromX + (targetX - fromX) * e;
+  const arc = Math.sin(local * Math.PI);
+  camera.position.set(
+    cx + Math.sin(t * 0.12) * 0.22 + arc * cfg.o,
+    cfg.h + arc * 0.32 + Math.sin(t * 0.4) * 0.02,
+    cfg.d - arc * 0.5
+  );
+  camera.fov = 44 - arc * 4;
+  camera.updateProjectionMatrix();
+  camera.lookAt(cx, cfg.h * 0.25 - 0.1, 0);
+
+  // debu emas
+  dust.position.y = Math.sin(t * 0.35) * 0.12;
+  dust.rotation.z = Math.sin(t * 0.05) * 0.02;
+
+  // Bab 1 — canting menulis: motif muncul mengikuti gerakan
+  const draw = i === 0 ? easeIO(clamp01((local - 0.12) / 0.72)) : (i > 0 ? 1 : 0);
+  paintDraw(draw);
+  waveCloth(cloth0, t, 0.35);
+  pArmR.rotation.x = -0.05 + Math.sin(t * 6.3) * 0.06;
+  pArmR.rotation.y = Math.sin(t * 3.1) * 0.22;
+  pKepala.rotation.y = Math.sin(t * 1.5) * 0.08;
+  pHand.getWorldPosition(tipPos);
+  const dropT = (t % 1.4) / 1.4;
+  tetes.position.set(tipPos.x - 0.05, tipPos.y - 0.08 - dropT * 0.55, tipPos.z + 0.03);
+  tetes.material.opacity = 1 - dropT;
+  apiLight.intensity = 1.9 + Math.sin(t * 9) * 0.5 + Math.sin(t * 23) * 0.25;
+  bara.material.emissiveIntensity = 1.2 + Math.sin(t * 7) * 0.35;
+
+  // Bab 2 — kain keraton & sang raja
+  waveCloth(cloth1, t * 0.9, 0.6);
+  waveCloth(cape, t * 1.6, 0.5);
+  rKepala.rotation.y = Math.sin(t * 0.6) * 0.18;
+  rTorso.scale.y = 1 + Math.sin(t * 1.9) * 0.012;
+
+  // Bab 3 — celup nila
+  const dip = (Math.sin(t * 0.9) + 1) / 2;
+  celup.position.y = 0.25 + dip * 0.55;
+  celupWarna.position.y = celup.position.y - 0.52;
+  waveCloth(celup, t * 1.2, 0.5);
+  waveCloth(hasil1, t * 1.1, 0.4);
+  waveCloth(hasil2, t * 1.15 + 2, 0.4);
+
+  // Bab 4 — laut & kapal
+  {
+    const pos = sea.geometry.attributes.position, base = sea.userData.base;
+    for (let k = 0; k < pos.count; k++) {
+      const x = base[k * 3], y = base[k * 3 + 1];
+      pos.array[k * 3 + 2] = 0.08 * Math.sin(x * 1.4 + t * 1.3) + 0.05 * Math.sin(y * 2 + t * 0.9);
+    }
+    pos.needsUpdate = true; sea.geometry.computeVertexNormals();
+    waveCloth(layar, t * 1.4, 1.4);
+    waveCloth(bendera, t * 3, 2.2);
+    waveCloth(cloth2, t, 1);
+    kapal.position.y = -0.75 + Math.sin(t * 1.1) * 0.06;
+    kapal.rotation.z = Math.sin(t * 0.9) * 0.03;
+    kapal2.position.y = -0.85 + Math.sin(t * 1.3 + 1) * 0.04;
+  }
+
+  // Bab 5 — cap berpindah sel & motif tercetak saat menyentuh kain
+  {
+    const stamp = Math.abs(Math.sin(t * 1.6));
+    cap.position.y = -0.35 + Math.pow(stamp, 0.6) * 0.5;
+    const k = Math.floor(t * 1.6 / Math.PI);
+    const nextCell = (k + 1) % 8;
+    const tx = -0.99 + (nextCell % 4) * 0.66;
+    const tz = nextCell < 4 ? -0.34 : 0.34;
+    cap.position.x += (tx - cap.position.x) * 0.12;
+    cap.position.z += (tz - cap.position.z) * 0.12;
+    if (k !== lastK) {
+      if (lastK !== -1 && i === 4) {
+        const cell = k % 8;
+        if (cell === 0) clearStamps();
+        paintCell(cell);
+      }
+      lastK = k;
+    }
+  }
+
+  // Bab 6 — dunia
+  globe.rotation.y = t * 0.25;
+  pita.rotation.y = -t * 0.35;
+  pita.position.y = Math.sin(t * 0.7) * 0.1;
+  {
+    const pos = pita.geometry.attributes.position, base = pita.userData.base;
+    for (let k = 0; k < pos.count; k++) {
+      const x = base[k * 3];
+      const a = x / 3.4 * Math.PI * 2;
+      pos.array[k * 3] = Math.cos(a) * 1.55;
+      pos.array[k * 3 + 2] = Math.sin(a) * 1.55;
+      pos.array[k * 3 + 1] = base[k * 3 + 1] + Math.sin(a * 3 + t) * 0.08;
+    }
+    pos.needsUpdate = true; pita.geometry.computeVertexNormals();
+  }
+  bintang.forEach((b, k) => { b.position.y = Math.sin(t * 1.3 + k) * 0.55; });
+  kelopak.forEach((p, k) => {
+    const cyc = (t * 0.1 + k / 24) % 1;
+    const a = t * 0.28 + k * 2.4;
+    const r = 1.35 + 0.45 * Math.sin(k * 3.1);
+    p.position.set(Math.cos(a) * r, cyc * 3.2 - 1.6, Math.sin(a) * r);
+    p.rotation.set(t * 1.2 + k, t * 0.9 + k * 2, k);
+  });
+
+  renderer.render(scene, camera);
+}
+tick();
+
+addEventListener('resize', () => {
+  camera.aspect = stageEl.clientWidth / stageEl.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(stageEl.clientWidth, stageEl.clientHeight);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #F5EFE2; }
+  body { font-family: 'Alegreya Sans', sans-serif; color: #2B2118; -webkit-font-smoothing: antialiased; }
+  a { color: #44507E; text-decoration: none; }
+  a:hover { color: #7A5427; }
+  ::selection { background: #E3D3AE; }
+  @keyframes patDrift { from { background-position: 0 0; } to { background-position: 240px 240px; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes dotPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.35); } }
+  @keyframes scrollFlipY { from { opacity: 0; transform: perspective(900px) rotateY(-42deg) translateZ(-70px); } to { opacity: 1; transform: perspective(900px) rotateY(0deg) translateZ(0); } }
+  @keyframes scrollTiltX { from { opacity: 0; transform: perspective(1000px) rotateX(26deg) translateY(42px); } to { opacity: 1; transform: perspective(1000px) rotateX(0deg) translateY(0); } }
+  @keyframes scrollRiseZ { from { opacity: 0; transform: perspective(900px) translateZ(-160px) translateY(30px); } to { opacity: 1; transform: perspective(900px) translateZ(0) translateY(0); } }
+  @keyframes scrollSpinY { from { transform: perspective(800px) rotateX(-16deg) rotateY(0deg); } to { transform: perspective(800px) rotateX(-16deg) rotateY(360deg); } }
+  @keyframes scrollParallax { from { transform: translateY(28px) scale(1.06); } to { transform: translateY(-28px) scale(1.06); } }
+  @keyframes introRise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes introDot { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.25); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+</style>
+<script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js" integrity="sha384-CjloA8y00+1SDAUkjs099PVfnY2KmDC2BZnws9kh8D/lX1s46w6EPhpXdqMfjK6i" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/topojson-client@3.1.0/dist/topojson-client.min.js" integrity="sha384-Ukv1p/xTma6P4/2bY5KzWBw+ydSpXmhCMtyciIQVDJ1RmOxtCYNMF1uXT9T63H67" crossorigin="anonymous"></script>
+</helmet>
+<div style="min-height: 100vh; background: #F5EFE2; color: #2B2118;">
+
+  <sc-if value="{{ showIntro }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Intro" style="position: fixed; inset: 0; z-index: 100; background: #2B2118; display: grid; place-items: center; overflow: hidden; transition: opacity 0.7s;" style="{{ introWrapStyle }}">
+      <div style="position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle at 25% 25%, #B99C5E 0 7px, transparent 8px), radial-gradient(circle at 75% 75%, #B99C5E 0 7px, transparent 8px); background-size: 44px 44px;"></div>
+      <div style="position: relative; text-align: center; padding: 0 24px; max-width: 640px;">
+        <div style="display: flex; justify-content: center; gap: 12px; margin-bottom: 34px;">
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #B99C5E; animation: introDot 0.6s 0.2s both;"></div>
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #A34A3F; animation: introDot 0.6s 0.45s both;"></div>
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #44507E; animation: introDot 0.6s 0.7s both;"></div>
+        </div>
+        <div style="font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; color: #B99C5E; font-weight: 700; animation: introRise 0.8s 0.9s both;">{{ L.introKicker }}</div>
+        <h1 style="font-family: Marcellus, serif; font-size: clamp(44px, 7vw, 78px); color: #F2E9D5; font-weight: 400; line-height: 1.08; margin: 18px 0 0; animation: introRise 0.8s 1.2s both;">Batik Nusantara</h1>
+        <p style="color: #C9B99A; font-size: 18px; line-height: 1.65; margin: 20px auto 0; max-width: 480px; animation: introRise 0.8s 1.6s both; text-wrap: pretty;">{{ L.introLede }}</p>
+        <button onClick="{{ enterSite }}" style="margin-top: 38px; background: #B99C5E; color: #2B2118; border: none; padding: 15px 40px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.06em; cursor: pointer; animation: introRise 0.8s 2s both;" style-hover="background: #CBB077;">{{ L.introCta }}</button>
+        <div style="margin-top: 18px; font-size: 13px; color: #8A7657; animation: introRise 0.8s 2.3s both;">{{ L.introSkip }}</div>
+      </div>
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 12px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 7px, transparent 7px 20px); opacity: 0.5;"></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showAsal }}" hint-placeholder-val="{{ false }}">
+    <div data-screen-label="Intro Asal Usul" style="position: fixed; inset: 0; z-index: 99; background: #2B2118; transition: opacity 0.7s;" style="{{ asalWrapStyle }}">
+      <iframe src="asal-usul-batik-3d.html?embed=1" style="position: absolute; inset: 0; width: 100%; height: 100%; border: none;" title="Asal Usul Batik"></iframe>
+      <button onClick="{{ skipAsal }}" style="position: absolute; top: 22px; right: 26px; z-index: 5; background: rgba(43,33,24,0.75); color: #F2E9D5; border: 1px solid #B99C5E; padding: 11px 24px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer;" style-hover="background: #B99C5E; color: #2B2118;">{{ L.asalSkip }} &rarr;</button>
+    </div>
+  </sc-if>
+
+  <header style="position: sticky; top: 0; z-index: 50; background: rgba(245,239,226,0.92); backdrop-filter: blur(8px); border-bottom: 1px solid #DCCEAC;">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onClick="{{ goBeranda }}">
+        <div style="width: 40px; height: 40px; border-radius: 4px; border: 1px solid #B99C5E; background-color: #EAD9B6; background-image: radial-gradient(circle at 25% 25%, #6B4A1F 0 5px, transparent 6px), radial-gradient(circle at 75% 75%, #6B4A1F 0 5px, transparent 6px); background-size: 26px 26px;"></div>
+        <div>
+          <div style="font-family: Marcellus, serif; font-size: 21px; line-height: 1;">Batik Nusantara</div>
+          <div style="font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A7657; margin-top: 3px;">{{ L.tagline }}</div>
+        </div>
+      </div>
+      <nav style="display: flex; gap: 2px; flex-wrap: wrap; margin-left: auto; justify-content: flex-end;">
+        <sc-for list="{{ navItems }}" as="it" hint-placeholder-count="5">
+          <button onClick="{{ it.go }}" style="{{ it.style }}">{{ it.label }}</button>
+        </sc-for>
+      </nav>
+      <div style="display: flex; border: 1px solid #B99C5E; border-radius: 999px; overflow: hidden;">
+        <button onClick="{{ setId }}" style="{{ idBtnStyle }}">ID</button>
+        <button onClick="{{ setEn }}" style="{{ enBtnStyle }}">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <sc-if value="{{ showBeranda }}" hint-placeholder-val="{{ true }}">
+    <main data-screen-label="Beranda">
+      <section style="position: relative; overflow: hidden;">
+        <div style="position: absolute; inset: 0; opacity: 0.06; background-image: radial-gradient(circle at 25% 25%, #6B4A1F 0 7px, transparent 8px), radial-gradient(circle at 75% 75%, #6B4A1F 0 7px, transparent 8px); background-size: 46px 46px; -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 5%, black, transparent); mask-image: radial-gradient(ellipse 90% 75% at 50% 5%, black, transparent);"></div>
+        <div style="position: relative; max-width: 1160px; margin: 0 auto; padding: 64px 24px 56px; text-align: center;">
+        <div style="font-size: 13px; letter-spacing: 0.22em; text-transform: uppercase; color: #7A5427; font-weight: 700; animation: fadeUp 0.7s ease-out both;">{{ L.kicker }}</div>
+        <h1 style="font-family: Marcellus, serif; font-size: clamp(42px, 6vw, 72px); line-height: 1.05; margin: 18px auto 0; max-width: 900px; font-weight: 400; animation: fadeUp 0.7s ease-out 0.12s both;">{{ L.heroTitle }}</h1>
+        <p style="font-size: 19px; line-height: 1.65; color: #5C4E3B; max-width: 700px; margin: 22px auto 0; text-wrap: pretty; animation: fadeUp 0.7s ease-out 0.24s both;">{{ L.heroLede }}</p>
+        <div style="display: flex; gap: 14px; justify-content: center; margin-top: 34px; flex-wrap: wrap; animation: fadeUp 0.7s ease-out 0.36s both;">
+          <button onClick="{{ goPeta }}" style="background: #44507E; color: #F6F0E2; border: none; padding: 14px 28px; border-radius: 4px; font-family: 'Alegreya Sans', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer;" style-hover="background: #37416A;">{{ L.ctaPeta }}</button>
+          <button onClick="{{ goGaleri }}" style="background: transparent; color: #2B2118; border: 1px solid #B99C5E; padding: 14px 28px; border-radius: 4px; font-family: 'Alegreya Sans', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 0.04em; cursor: pointer;" style-hover="background: #EDE3CC;">{{ L.ctaGaleri }}</button>
+        </div>
+        </div>
+      </section>
+      <section style="max-width: 1160px; margin: 0 auto 48px; padding: 0 24px;">
+        <div style="position: relative; border: 1px solid #DCCEAC; border-radius: 8px; overflow: hidden; background: #F5EFE2; box-shadow: 0 24px 48px rgba(43,33,24,0.12);">
+          <iframe src="animasi-3d.html?embed=1" title="Animasi 3D kain batik" style="display: block; width: 100%; height: 280px; border: none; pointer-events: none;"></iframe>
+          <a href="animasi-3d.html" style="position: absolute; right: 16px; bottom: 14px; background: rgba(245,239,226,0.94); border: 1px solid #B99C5E; border-radius: 999px; padding: 8px 18px; font-size: 13.5px; font-weight: 700; color: #44507E;" style-hover="color: #7A5427;">{{ L.hero3dCta }}</a>
+        </div>
+      </section>
+      <section style="display: flex; height: 110px; border-top: 1px solid #DCCEAC; border-bottom: 1px solid #DCCEAC; overflow: hidden; animation: scrollParallax linear both; animation-timeline: view(); animation-range: entry 0% exit 100%;">
+        <sc-for list="{{ band }}" as="b" hint-placeholder-count="6">
+          <div style="{{ b.style }}" title="{{ b.name }}"></div>
+        </sc-for>
+      </section>
+      <section style="max-width: 1160px; margin: 0 auto; padding: 64px 24px 40px; display: flex; gap: 40px; justify-content: center; flex-wrap: wrap;">
+        <sc-for list="{{ cubes }}" as="c" hint-placeholder-count="3">
+          <div style="text-align: center;">
+            <div style="width: 120px; height: 120px; margin: 0 auto; transform-style: preserve-3d; animation: scrollSpinY linear both; animation-timeline: view(); animation-range: cover 0% cover 100%;">
+              <div style="{{ c.f1 }}"></div>
+              <div style="{{ c.f2 }}"></div>
+              <div style="{{ c.f3 }}"></div>
+              <div style="{{ c.f4 }}"></div>
+              <div style="{{ c.top }}"></div>
+              <div style="{{ c.bot }}"></div>
+            </div>
+            <div style="font-family: Marcellus, serif; font-size: 20px; margin-top: 22px;">{{ c.name }}</div>
+            <div style="font-size: 12.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #8A7657; margin-top: 4px;">{{ c.region }}</div>
+          </div>
+        </sc-for>
+      </section>
+      <section style="max-width: 1160px; margin: 0 auto; padding: 48px 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 24px; text-align: center;">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+          <div style="animation: scrollTiltX linear both; animation-timeline: view(); animation-range: entry 0% cover 30%;">
+            <div style="width: 28px; height: 3px; background: #B99C5E; margin: 0 auto 14px;"></div>
+            <div style="font-family: Marcellus, serif; font-size: 44px; color: #44507E;">{{ s.n }}</div>
+            <div style="font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #8A7657; margin-top: 4px;">{{ s.l }}</div>
+          </div>
+        </sc-for>
+      </section>
+      <section style="max-width: 1160px; margin: 0 auto; padding: 24px 24px 72px;">
+        <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+        <h2 style="font-family: Marcellus, serif; font-size: 34px; font-weight: 400; margin: 0 0 6px;">{{ L.featTitle }}</h2>
+        <p style="color: #5C4E3B; margin: 0 0 28px; font-size: 16px;">{{ L.featSub }}</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
+          <sc-for list="{{ featured }}" as="m" hint-placeholder-count="4">
+            <article style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; transition: box-shadow 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="box-shadow: 0 14px 28px rgba(43,33,24,0.14);">
+              <div style="{{ m.swatch }}"></div>
+              <div style="padding: 16px 18px 18px;">
+                <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ m.name }}</h3>
+                <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7A5427; margin: 5px 0 8px;">{{ m.regionName }}</div>
+                <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 0; text-wrap: pretty;">{{ m.phil }}</p>
+              </div>
+            </article>
+          </sc-for>
+        </div>
+      </section>
+      <section style="max-width: 1160px; margin: 0 auto; padding: 0 24px 72px;">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 22px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 9px; margin-bottom: 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+            <h2 style="font-family: Marcellus, serif; font-size: 34px; font-weight: 400; margin: 0 0 6px;">{{ L.mediaTitle }}</h2>
+            <p style="color: #5C4E3B; margin: 0; font-size: 16px;">{{ L.mediaSub }}</p>
+          </div>
+          <button onClick="{{ goMedia }}" style="background: transparent; border: 1px solid #B99C5E; color: #2B2118; padding: 11px 24px; border-radius: 999px; font-family: 'Alegreya Sans', sans-serif; font-size: 14.5px; font-weight: 700; cursor: pointer; white-space: nowrap;" style-hover="background: #EDE3CC;">{{ L.mediaAll }} &rarr;</button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+          <a href="asal-usul-batik-3d.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: box-shadow 0.3s, border-color 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16);">
+            <div style="height: 150px; background-color: #2B2118; background-image: radial-gradient(circle at 30% 40%, rgba(185,156,94,0.35) 0 40px, transparent 60px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; display: grid; place-items: center;">
+                <div style="width: 0; height: 0; border-top: 11px solid transparent; border-bottom: 11px solid transparent; border-left: 17px solid #7A5427; margin-left: 4px;"></div>
+              </div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaAsal }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaAsalDesc }}</p>
+            </div>
+          </a>
+          <a href="game-3d-membatik.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: box-shadow 0.3s, border-color 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16);">
+            <div style="height: 150px; background-color: #EFE3C8; background-image: repeating-linear-gradient(45deg, rgba(107,74,31,0.5) 0 6px, transparent 6px 18px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center; perspective: 500px;">
+              <div style="width: 60px; height: 40px; background: rgba(245,239,226,0.94); border: 1px solid #B99C5E; border-radius: 4px; transform: rotateX(45deg) rotateZ(-8deg); display: grid; place-items: center; font-family: Marcellus, serif; font-size: 16px; color: #7A5427;">3D</div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaGame3d }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaGame3dDesc }}</p>
+            </div>
+          </a>
+          <a href="Studio Batik.dc.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: box-shadow 0.3s, border-color 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16);">
+            <div style="height: 150px; background-color: #EAD9B6; background-image: linear-gradient(45deg, #6B4A1F 25%, transparent 25%, transparent 75%, #6B4A1F 75%), linear-gradient(45deg, #6B4A1F 25%, transparent 25%, transparent 75%, #6B4A1F 75%); background-size: 28px 28px; background-position: 0 0, 14px 14px; border-bottom: 1px solid #DCCEAC; display: grid; place-items: center;">
+              <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; display: grid; place-items: center; font-family: Marcellus, serif; font-size: 25px; color: #7A5427;">&#9998;</div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaStudio }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaStudioDesc }}</p>
+            </div>
+          </a>
+        </div>
+      </section>
+      <section style="background: #2B2118; color: #EFE6D2;">
+        <div style="height: 10px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 7px, transparent 7px 20px); opacity: 0.45;"></div>
+        <div style="max-width: 860px; margin: 0 auto; padding: 50px 24px 64px; text-align: center; animation: scrollRiseZ linear both; animation-timeline: view(); animation-range: entry 0% cover 42%;">
+          <div style="font-family: Marcellus, serif; font-size: 84px; line-height: 0.7; color: #B99C5E;">&#8220;</div>
+          <p style="font-family: Marcellus, serif; font-size: clamp(22px, 3vw, 30px); line-height: 1.5; margin: 0;">{{ L.quote }}</p>
+          <div style="font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: #B99C5E; margin-top: 18px;">{{ L.quoteBy }}</div>
+          <button onClick="{{ goSejarah }}" style="margin-top: 30px; background: transparent; color: #EFE6D2; border: 1px solid #B99C5E; padding: 12px 26px; border-radius: 4px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer;" style-hover="background: rgba(185,156,94,0.18);">{{ L.ctaSejarah }}</button>
+        </div>
+      </section>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showMedia }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Media Interaktif" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+        <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 32px;">
+          <div style="position: absolute; inset: 0; opacity: 0.12; background-image: repeating-radial-gradient(circle at 15% 115%, #B99C5E 0 8px, transparent 8px 20px);"></div>
+          <div style="position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border: 1px solid rgba(185,156,94,0.3); border-radius: 50%;"></div>
+          <div style="position: relative;">
+            <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kMedia }}</div>
+            <h2 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.mediaTitle }}</h2>
+            <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.mediaSub }}</p>
+          </div>
+          <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+        </section>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+          <a href="asal-usul-batik-3d.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: box-shadow 0.3s, border-color 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16);">
+            <div style="height: 130px; background-color: #2B2118; background-image: radial-gradient(circle at 30% 40%, rgba(185,156,94,0.35) 0 40px, transparent 60px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center;">
+              <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; display: grid; place-items: center;">
+                <div style="width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid #7A5427; margin-left: 4px;"></div>
+              </div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaAsal }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaAsalDesc }}</p>
+            </div>
+          </a>
+          <a href="Animasi Batik.dc.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16); transform: translateY(-4px);">
+            <div style="height: 130px; background-color: #EAD9B6; background-image: repeating-linear-gradient(45deg, #6B4A1F 0 7px, transparent 7px 20px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center; animation: patDrift 16s linear infinite;">
+              <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; display: grid; place-items: center;">
+                <div style="width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid #44507E; margin-left: 4px;"></div>
+              </div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaVideo }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaVideoDesc }}</p>
+            </div>
+          </a>
+          <a href="animasi-3d.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16); transform: translateY(-4px);">
+            <div style="height: 130px; background-color: #F1DFD2; background-image: repeating-linear-gradient(45deg, #A34A3F 0 6px, transparent 6px 18px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center; animation: patDrift 14s linear infinite reverse;">
+              <div style="width: 60px; height: 40px; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; border-radius: 4px; transform: perspective(200px) rotateY(-28deg) rotateX(8deg);"></div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.media3dAnim }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.media3dAnimDesc }}</p>
+            </div>
+          </a>
+          <a href="Studio Batik.dc.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: box-shadow 0.3s, border-color 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16);">
+            <div style="height: 130px; background-color: #EAD9B6; background-image: linear-gradient(45deg, #6B4A1F 25%, transparent 25%, transparent 75%, #6B4A1F 75%), linear-gradient(45deg, #6B4A1F 25%, transparent 25%, transparent 75%, #6B4A1F 75%); background-size: 28px 28px; background-position: 0 0, 14px 14px; border-bottom: 1px solid #DCCEAC; display: grid; place-items: center; animation: patDrift 18s linear infinite reverse;">
+              <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; display: grid; place-items: center; font-family: Marcellus, serif; font-size: 24px; color: #7A5427;">&#9998;</div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaStudio }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaStudioDesc }}</p>
+            </div>
+          </a>
+          <a href="game-3d-membatik.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: box-shadow 0.3s, border-color 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16);">
+            <div style="height: 130px; background-color: #EFE3C8; background-image: repeating-linear-gradient(45deg, rgba(107,74,31,0.5) 0 6px, transparent 6px 18px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center; perspective: 500px;">
+              <div style="width: 56px; height: 38px; background: rgba(245,239,226,0.94); border: 1px solid #B99C5E; border-radius: 4px; transform: rotateX(45deg) rotateZ(-8deg); display: grid; place-items: center; font-family: Marcellus, serif; font-size: 15px; color: #7A5427;">3D</div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaGame3d }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaGame3dDesc }}</p>
+            </div>
+          </a>
+          <a href="Game Batik.dc.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16); transform: translateY(-4px);">
+            <div style="height: 130px; background-color: #2B2118; background-image: radial-gradient(circle at 25% 25%, rgba(185,156,94,0.4) 0 6px, transparent 7px), radial-gradient(circle at 75% 75%, rgba(185,156,94,0.4) 0 6px, transparent 7px); background-size: 40px 40px; border-bottom: 1px solid #DCCEAC; display: grid; place-items: center;">
+              <div style="width: 52px; height: 52px; border-radius: 50%; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; display: grid; place-items: center; font-family: Marcellus, serif; font-size: 22px; color: #7A5427;">?</div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.mediaGame }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.mediaGameDesc }}</p>
+            </div>
+          </a>
+          <a href="objek-3d.html" style="display: block; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; color: inherit; transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;" style-hover="border-color: #B99C5E; box-shadow: 0 14px 28px rgba(43,33,24,0.16); transform: translateY(-4px);">
+            <div style="height: 130px; background-color: #D8DCEA; background-image: repeating-radial-gradient(circle at 15% 115%, #3D4870 0 9px, transparent 9px 19px); border-bottom: 1px solid #DCCEAC; display: grid; place-items: center; perspective: 500px; animation: patDrift 20s linear infinite;">
+              <div style="width: 44px; height: 44px; background: rgba(245,239,226,0.92); border: 1px solid #B99C5E; transform: rotateX(50deg) rotateZ(45deg);"></div>
+            </div>
+            <div style="padding: 16px 18px 18px;">
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ L.media3d }}</h3>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 6px 0 0;">{{ L.media3dDesc }}</p>
+            </div>
+          </a>
+        </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showPeta }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Peta Interaktif" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+      <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 32px;">
+        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle at 25% 25%, #B99C5E 0 6px, transparent 7px), radial-gradient(circle at 75% 75%, #B99C5E 0 6px, transparent 7px); background-size: 42px 42px;"></div>
+        <div style="position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border: 1px solid rgba(185,156,94,0.3); border-radius: 50%;"></div>
+        <div style="position: absolute; right: 10px; top: 10px; width: 120px; height: 120px; border: 1px solid rgba(185,156,94,0.22); border-radius: 50%;"></div>
+        <div style="position: relative;">
+          <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kPeta }}</div>
+          <h1 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.petaTitle }}</h1>
+          <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.petaSub }}</p>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+      </section>
+      <div style="background: #FBF6E9; border: 1px solid #DCCEAC; border-radius: 8px; padding: 12px;">
+        <x-import component-from-global-scope="batik-map" from="./batik-map.js" labels="{{ mapLabelsAttr }}" hint-size="100%,420px"></x-import>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;">
+        <sc-for list="{{ regionChips }}" as="rc" hint-placeholder-count="8">
+          <button onClick="{{ rc.go }}" style="{{ rc.style }}">{{ rc.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+        <section style="margin-top: 36px;">
+          <div style="font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase; color: #7A5427; font-weight: 700;">{{ selProv }}</div>
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 4px 0 20px;">
+            <h2 style="font-family: Marcellus, serif; font-size: 32px; font-weight: 400; margin: 0;">{{ selName }}</h2>
+            <a href="{{ gmapsUrl }}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; background: #44507E; color: #F6F0E2; padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 700; letter-spacing: 0.03em;" style-hover="background: #37416A; color: #F6F0E2;">
+              <span style="width: 9px; height: 9px; border-radius: 50% 50% 50% 0; background: #F6F0E2; transform: rotate(-45deg);"></span>
+              {{ L.rute }}
+            </a>
+            <span style="font-size: 13px; color: #8A7657; font-style: italic;">{{ L.ruteHint }}</span>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;">
+            <sc-for list="{{ selMotifs }}" as="m" hint-placeholder-count="2">
+              <article style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; transition: box-shadow 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="box-shadow: 0 14px 28px rgba(43,33,24,0.14);">
+                <div style="{{ m.swatch }}"></div>
+                <div style="padding: 16px 18px 18px;">
+                  <h3 style="font-family: Marcellus, serif; font-size: 20px; margin: 0; font-weight: 400;">{{ m.name }}</h3>
+                  <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 8px 0 0; text-wrap: pretty;">{{ m.phil }}</p>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+        </section>
+      </sc-if>
+      <sc-if value="{{ noSel }}" hint-placeholder-val="{{ true }}">
+        <p style="margin-top: 28px; text-align: center; color: #8A7657; font-size: 16px; font-style: italic;">{{ L.mapHint }}</p>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showGaleri }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Galeri Motif" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+      <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 28px;">
+        <div style="position: absolute; inset: 0; opacity: 0.12; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 20px);"></div>
+        <div style="position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border: 1px solid rgba(185,156,94,0.3); border-radius: 50%;"></div>
+        <div style="position: relative;">
+          <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kGaleri }}</div>
+          <h1 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.galeriTitle }}</h1>
+          <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.galeriSub }}</p>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+      </section>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 18px;">
+        <input type="search" value="{{ query }}" onInput="{{ onSearch }}" placeholder="{{ L.searchPh }}" style="flex: 1; min-width: 240px; max-width: 360px; background: #FDFAF1; border: 1px solid #C9B685; border-radius: 999px; padding: 11px 20px; font-family: 'Alegreya Sans', sans-serif; font-size: 15px; color: #2B2118; outline: none;" style-focus="border-color: #44507E;" />
+        <span style="font-size: 13.5px; color: #8A7657;">{{ resultCount }}</span>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;">
+        <sc-for list="{{ chips }}" as="ch" hint-placeholder-count="7">
+          <button onClick="{{ ch.go }}" style="{{ ch.style }}">{{ ch.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ noResult }}" hint-placeholder-val="{{ false }}">
+        <p style="text-align: center; color: #8A7657; font-size: 16px; font-style: italic; padding: 40px 0;">{{ L.noResult }}</p>
+      </sc-if>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+        <sc-for list="{{ motifs }}" as="m" hint-placeholder-count="6">
+          <article style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 30%;" style="{{ m.cardStyle }}" style-hover="box-shadow: 0 14px 28px rgba(43,33,24,0.14);">
+            <div style="{{ m.swatch }}"></div>
+            <div style="padding: 16px 18px 18px;">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px;">
+                <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ m.name }}</h3>
+                <span style="font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A7657; white-space: nowrap;">{{ m.group }}</span>
+              </div>
+              <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7A5427; margin: 5px 0 8px;">{{ m.regionName }}</div>
+              <p style="font-size: 14.5px; line-height: 1.55; color: #5C4E3B; margin: 0; text-wrap: pretty;">{{ m.phil }}</p>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+      <p style="margin-top: 28px; font-size: 13px; color: #8A7657; font-style: italic; text-align: center;">{{ L.swatchNote }}</p>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showSejarah }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Sejarah dan Proses" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+      <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 40px;">
+        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle at 25% 25%, #B99C5E 0 6px, transparent 7px), radial-gradient(circle at 75% 75%, #B99C5E 0 6px, transparent 7px); background-size: 42px 42px;"></div>
+        <div style="position: absolute; right: -40px; bottom: -60px; width: 220px; height: 220px; border: 1px solid rgba(185,156,94,0.3); border-radius: 50%;"></div>
+        <div style="position: relative;">
+          <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kSejarah }}</div>
+          <h1 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.sejarahTitle }}</h1>
+          <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.sejarahSub }}</p>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+      </section>
+      <div style="display: grid; gap: 0; max-width: 860px;">
+        <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: 150px 26px 1fr; gap: 0 18px; animation: scrollRiseZ linear both; animation-timeline: view(); animation-range: entry 0% cover 26%;">
+            <div style="font-family: Marcellus, serif; font-size: 20px; color: #7A5427; text-align: right; padding: 22px 0;">{{ t.era }}</div>
+            <div style="position: relative;">
+              <div style="position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: #DCCEAC; transform: translateX(-50%);"></div>
+              <div style="position: absolute; left: 50%; top: 29px; width: 11px; height: 11px; border-radius: 50%; background: #B99C5E; border: 2px solid #F5EFE2; box-shadow: 0 0 0 1px #B99C5E; transform: translateX(-50%);"></div>
+            </div>
+            <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #4A3E2E; text-wrap: pretty; padding: 22px 0;">{{ t.text }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; margin: 64px 0 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+      <h2 style="font-family: Marcellus, serif; font-size: 32px; font-weight: 400; margin: 0 0 8px;">{{ L.prosesTitle }}</h2>
+      <p style="color: #5C4E3B; font-size: 16px; max-width: 720px; margin: 0 0 28px; line-height: 1.6;">{{ L.prosesSub }}</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <sc-for list="{{ proses }}" as="p" hint-placeholder-count="5">
+          <div style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; padding: 20px; transition: box-shadow 0.3s; animation: scrollTiltX linear both; animation-timeline: view(); animation-range: entry 5% cover 30%;" style-hover="box-shadow: 0 12px 24px rgba(43,33,24,0.12);">
+            <div style="width: 46px; height: 46px; border-radius: 50%; border: 1px solid #B99C5E; background: #F5EFE2; display: grid; place-items: center; font-family: Marcellus, serif; font-size: 19px; color: #7A5427;">{{ p.n }}</div>
+            <div style="font-weight: 800; font-size: 16px; margin: 8px 0 6px;">{{ p.name }}</div>
+            <p style="margin: 0; font-size: 14px; line-height: 1.55; color: #5C4E3B;">{{ p.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; margin: 64px 0 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+      <h2 style="font-family: Marcellus, serif; font-size: 32px; font-weight: 400; margin: 0 0 8px;">{{ L.jenisTitle }}</h2>
+      <p style="color: #5C4E3B; font-size: 16px; max-width: 720px; margin: 0 0 28px; line-height: 1.6;">{{ L.jenisSub }}</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+        <sc-for list="{{ jenis }}" as="j" hint-placeholder-count="3">
+          <div style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; padding: 24px; display: flex; flex-direction: column; gap: 10px; transition: box-shadow 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="box-shadow: 0 12px 24px rgba(43,33,24,0.12);">
+            <div style="{{ j.swatch }}"></div>
+            <h3 style="font-family: Marcellus, serif; font-size: 24px; margin: 6px 0 0; font-weight: 400;">{{ j.name }}</h3>
+            <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7A5427; font-weight: 700;">{{ j.time }}</div>
+            <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #5C4E3B; text-wrap: pretty;">{{ j.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showPengrajin }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Sentra dan Pengrajin" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+      <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 34px;">
+        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle at 50% 50%, #B99C5E 0 5px, transparent 6px); background-size: 34px 34px;"></div>
+        <div style="position: absolute; right: -50px; top: -50px; width: 210px; height: 210px; border: 1px solid rgba(185,156,94,0.28); border-radius: 50%;"></div>
+        <div style="position: relative;">
+          <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kPengrajin }}</div>
+          <h1 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.sentraTitle }}</h1>
+          <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.sentraSub }}</p>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+      </section>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+        <sc-for list="{{ sentra }}" as="s" hint-placeholder-count="6">
+          <article style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; padding: 24px; display: flex; gap: 16px; align-items: flex-start; transition: box-shadow 0.3s; animation: scrollRiseZ linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="box-shadow: 0 12px 24px rgba(43,33,24,0.12);">
+            <div style="{{ s.avatar }}"></div>
+            <div>
+              <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 0; font-weight: 400;">{{ s.name }}</h3>
+              <div style="font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #7A5427; margin: 4px 0 8px;">{{ s.place }}</div>
+              <p style="margin: 0; font-size: 14.5px; line-height: 1.55; color: #5C4E3B; text-wrap: pretty;">{{ s.desc }}</p>
+            </div>
+          </article>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showPanduan }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Panduan dan Glosarium" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+      <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 34px;">
+        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: linear-gradient(45deg, #B99C5E 25%, transparent 25%, transparent 75%, #B99C5E 75%), linear-gradient(45deg, #B99C5E 25%, transparent 25%, transparent 75%, #B99C5E 75%); background-size: 30px 30px; background-position: 0 0, 15px 15px;"></div>
+        <div style="position: absolute; right: -40px; top: -40px; width: 190px; height: 190px; border: 1px solid rgba(185,156,94,0.3); border-radius: 50%;"></div>
+        <div style="position: relative;">
+          <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kPanduan }}</div>
+          <h1 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.panduanTitle }}</h1>
+          <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.panduanSub }}</p>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+      </section>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+        <sc-for list="{{ kenali }}" as="k" hint-placeholder-count="4">
+          <div style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; padding: 24px; transition: box-shadow 0.3s; animation: scrollTiltX linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="box-shadow: 0 12px 24px rgba(43,33,24,0.12);">
+            <div style="font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: #7A5427; font-weight: 800;">{{ k.tag }}</div>
+            <h3 style="font-family: Marcellus, serif; font-size: 21px; margin: 8px 0 8px; font-weight: 400;">{{ k.name }}</h3>
+            <p style="margin: 0; font-size: 14.5px; line-height: 1.6; color: #5C4E3B; text-wrap: pretty;">{{ k.desc }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; margin: 64px 0 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+      <h2 style="font-family: Marcellus, serif; font-size: 32px; font-weight: 400; margin: 0 0 8px;">{{ L.rawatTitle }}</h2>
+      <p style="color: #5C4E3B; font-size: 16px; max-width: 720px; margin: 0 0 24px; line-height: 1.6;">{{ L.rawatSub }}</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; max-width: 900px;">
+        <sc-for list="{{ rawat }}" as="r" hint-placeholder-count="6">
+          <div style="display: flex; gap: 12px; align-items: flex-start; background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; padding: 16px 18px;">
+            <div style="{{ r.markStyle }}">{{ r.mark }}</div>
+            <p style="margin: 0; font-size: 14.5px; line-height: 1.55; color: #4A3E2E; text-wrap: pretty;">{{ r.text }}</p>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display: flex; align-items: center; gap: 9px; margin: 64px 0 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+      <h2 style="font-family: Marcellus, serif; font-size: 32px; font-weight: 400; margin: 0 0 8px;">{{ L.glosTitle }}</h2>
+      <p style="color: #5C4E3B; font-size: 16px; max-width: 720px; margin: 0 0 24px; line-height: 1.6;">{{ L.glosSub }}</p>
+      <div style="max-width: 900px;">
+        <sc-for list="{{ glosarium }}" as="g" hint-placeholder-count="8">
+          <div style="display: grid; grid-template-columns: 190px 1fr; gap: 20px; padding: 16px 0; border-top: 1px solid #DCCEAC;">
+            <div style="font-family: Marcellus, serif; font-size: 19px; color: #7A5427;">{{ g.term }}</div>
+            <p style="margin: 0; font-size: 15.5px; line-height: 1.6; color: #4A3E2E; text-wrap: pretty;">{{ g.def }}</p>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <sc-if value="{{ showTentang }}" hint-placeholder-val="{{ false }}">
+    <main data-screen-label="Tentang dan Pustaka" style="max-width: 1160px; margin: 0 auto; padding: 48px 24px 72px;">
+      <section style="position: relative; overflow: hidden; border-radius: 10px; background: #2B2118; padding: 44px 42px 46px; margin-bottom: 34px;">
+        <div style="position: absolute; inset: 0; opacity: 0.1; background-image: radial-gradient(circle at 25% 25%, #B99C5E 0 6px, transparent 7px), radial-gradient(circle at 75% 75%, #B99C5E 0 6px, transparent 7px); background-size: 42px 42px;"></div>
+        <div style="position: absolute; right: -40px; bottom: -70px; width: 220px; height: 220px; border: 1px solid rgba(185,156,94,0.3); border-radius: 50%;"></div>
+        <div style="position: relative;">
+          <div style="font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: #B99C5E; font-weight: 800;">{{ L.kTentang }}</div>
+          <h1 style="font-family: Marcellus, serif; font-size: clamp(34px, 4.4vw, 48px); color: #F2E9D5; font-weight: 400; margin: 12px 0 0; line-height: 1.1;">{{ L.timTitle }}</h1>
+          <p style="color: #C9B99A; font-size: 17px; line-height: 1.6; margin: 14px 0 0; max-width: 640px; text-wrap: pretty;">{{ L.timSub }}</p>
+        </div>
+        <div style="position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 6px, transparent 6px 18px); opacity: 0.5;"></div>
+      </section>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 20px;">
+        <sc-for list="{{ tim }}" as="p" hint-placeholder-count="5">
+          <article style="background: #FDFAF1; border: 1px solid #DCCEAC; border-radius: 6px; padding: 24px; text-align: center; transition: box-shadow 0.3s; animation: scrollFlipY linear both; animation-timeline: view(); animation-range: entry 5% cover 32%;" style-hover="box-shadow: 0 12px 24px rgba(43,33,24,0.12);">
+            <div style="{{ p.avatar }}"></div>
+            <h3 style="font-family: Marcellus, serif; font-size: 19px; margin: 14px 0 4px; font-weight: 400;">{{ p.name }}</h3>
+            <div style="font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #7A5427; font-weight: 700;">{{ p.role }}</div>
+          </article>
+        </sc-for>
+      </div>
+      <p style="margin-top: 18px; font-size: 13.5px; color: #8A7657; font-style: italic;">{{ L.timNote }}</p>
+      <div style="display: flex; align-items: center; gap: 9px; margin: 64px 0 14px;"><div style="width: 34px; height: 2px; background: #B99C5E;"></div><div style="width: 7px; height: 7px; background: #B99C5E; transform: rotate(45deg);"></div></div>
+      <h2 style="font-family: Marcellus, serif; font-size: 32px; font-weight: 400; margin: 0 0 8px;">{{ L.pustakaTitle }}</h2>
+      <p style="color: #5C4E3B; font-size: 16px; max-width: 720px; margin: 0 0 24px; line-height: 1.6;">{{ L.pustakaSub }}</p>
+      <div style="max-width: 900px;">
+        <sc-for list="{{ pustaka }}" as="s" hint-placeholder-count="6">
+          <div style="display: grid; grid-template-columns: 26px 1fr; gap: 14px; padding: 15px 0; border-top: 1px solid #DCCEAC;">
+            <div style="font-family: Marcellus, serif; font-size: 16px; color: #B99C5E;">{{ s.n }}</div>
+            <div>
+              <p style="margin: 0; font-size: 15.5px; line-height: 1.6; color: #4A3E2E; text-wrap: pretty;">{{ s.text }}</p>
+              <div style="font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: #8A7657; margin-top: 5px;">{{ s.kind }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </main>
+  </sc-if>
+
+  <footer style="border-top: 1px solid #DCCEAC; background: #EFE6D0;">
+    <div style="max-width: 1160px; margin: 0 auto; padding: 40px 24px 34px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 30px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 34px; height: 34px; border-radius: 4px; border: 1px solid #B99C5E; background-color: #EAD9B6; background-image: radial-gradient(circle at 25% 25%, #6B4A1F 0 4px, transparent 5px), radial-gradient(circle at 75% 75%, #6B4A1F 0 4px, transparent 5px); background-size: 22px 22px;"></div>
+          <div style="font-family: Marcellus, serif; font-size: 19px;">Batik Nusantara</div>
+        </div>
+        <p style="font-size: 14px; line-height: 1.6; color: #6B5B42; margin: 12px 0 0; max-width: 300px; text-wrap: pretty;">{{ L.footLede }}</p>
+      </div>
+      <div>
+        <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #7A5427; font-weight: 800; margin-bottom: 12px;">{{ L.footNav }}</div>
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-start;">
+          <sc-for list="{{ footerNav }}" as="it" hint-placeholder-count="8">
+            <button onClick="{{ it.go }}" style="background: none; border: none; padding: 0; font-family: 'Alegreya Sans', sans-serif; font-size: 14.5px; color: #44507E; cursor: pointer;" style-hover="color: #7A5427;">{{ it.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: #7A5427; font-weight: 800; margin-bottom: 12px;">{{ L.footNoteTitle }}</div>
+        <p style="font-size: 14px; line-height: 1.6; color: #6B5B42; margin: 0; text-wrap: pretty;">{{ L.footNote }}</p>
+        <div style="margin-top: 10px; font-size: 13px; color: #8A7657;">{{ L.introSkip }}</div>
+      </div>
+    </div>
+    <div style="border-top: 1px solid #DCCEAC;">
+      <div style="max-width: 1160px; margin: 0 auto; padding: 14px 24px; font-size: 13px; color: #8A7657; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+        <div>Batik Nusantara — {{ L.footLeft }}</div>
+        <div>{{ L.footDay }}</div>
+      </div>
+    </div>
+    <div style="height: 10px; background-image: repeating-linear-gradient(45deg, #B99C5E 0 7px, transparent 7px 20px); opacity: 0.5;"></div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;defaultLang&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;id&quot;, &quot;en&quot;], &quot;default&quot;: &quot;id&quot;, &quot;tsType&quot;: &quot;'id' | 'en'&quot;, &quot;section&quot;: &quot;Perilaku&quot; },
+  &quot;mapLabels&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Perilaku&quot; },
+  &quot;intro&quot;: { &quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Perilaku&quot; }
+}">
+class Component extends DCLogic {
+  state = { page: 'beranda', lang: null, filter: 'all', sel: null, intro: true, introFade: false, asal: false, asalFade: false };
+
+  enterSite = () => {
+    this.setState({ introFade: true });
+    setTimeout(() => this.setState({ intro: false, asal: true }), 700);
+  };
+
+  skipAsal = () => {
+    this.setState({ asalFade: true });
+    setTimeout(() => this.setState({ asal: false }), 700);
+  };
+
+  componentDidMount() {
+    this._onSel = (e) => this.setState({ sel: e.detail.id, page: 'peta' });
+    document.addEventListener('region-select', this._onSel);
+  }
+  componentWillUnmount() { document.removeEventListener('region-select', this._onSel); }
+
+  go(page) { this.setState({ page }); window.scrollTo(0, 0); }
+  pickRegion(id) {
+    this.setState({ sel: id });
+    const m = document.querySelector('batik-map');
+    if (m && m.select) m.select(id);
+  }
+
+  renderVals() {
+    const lang = this.state.lang ?? (this.props.defaultLang ?? 'id');
+    const t = (o) => (typeof o === 'string' ? o : o[lang]);
+
+    // ---------- pattern swatch generators (stylized, geometric) ----------
+    const P = {
+      parang: (a, b) => ({ backgroundColor: a, backgroundImage: `repeating-linear-gradient(45deg, ${b} 0px, ${b} 7px, transparent 7px, transparent 20px), repeating-linear-gradient(45deg, ${b}66 10px, ${b}66 13px, transparent 13px, transparent 20px)` }),
+      kawung: (a, b) => ({ backgroundColor: a, backgroundImage: `radial-gradient(circle at 25% 25%, ${b} 0 7px, transparent 8px), radial-gradient(circle at 75% 75%, ${b} 0 7px, transparent 8px), radial-gradient(circle at 75% 25%, ${b}88 0 7px, transparent 8px), radial-gradient(circle at 25% 75%, ${b}88 0 7px, transparent 8px)`, backgroundSize: '38px 38px' }),
+      truntum: (a, b) => ({ backgroundColor: a, backgroundImage: `radial-gradient(circle, ${b} 0 3.5px, transparent 4.5px), radial-gradient(circle, ${b}bb 0 2px, transparent 3px)`, backgroundSize: '22px 22px, 11px 11px', backgroundPosition: '0 0, 5.5px 5.5px' }),
+      nitik: (a, b) => ({ backgroundColor: a, backgroundImage: `linear-gradient(45deg, ${b} 25%, transparent 25%, transparent 75%, ${b} 75%), linear-gradient(45deg, ${b} 25%, transparent 25%, transparent 75%, ${b} 75%)`, backgroundSize: '28px 28px', backgroundPosition: '0 0, 14px 14px' }),
+      mega: (a, b) => ({ backgroundColor: a, backgroundImage: `repeating-radial-gradient(circle at 15% 115%, ${b} 0 9px, transparent 9px 19px), repeating-radial-gradient(circle at 85% -15%, ${b}77 0 9px, transparent 9px 19px)` }),
+      lereng: (a, b) => ({ backgroundColor: a, backgroundImage: `repeating-linear-gradient(63deg, ${b} 0 4px, transparent 4px 15px)` }),
+      ceplok: (a, b) => ({ backgroundColor: a, backgroundImage: `radial-gradient(circle, ${b} 0 4px, transparent 5px), linear-gradient(${b}44 1.5px, transparent 1.5px), linear-gradient(90deg, ${b}44 1.5px, transparent 1.5px)`, backgroundSize: '30px 30px' }),
+      floral: (a, b) => ({ backgroundColor: a, backgroundImage: `radial-gradient(circle at 30% 35%, ${b} 0 5px, transparent 6px), radial-gradient(circle at 70% 64%, ${b}99 0 4px, transparent 5px), radial-gradient(circle at 55% 20%, ${b}66 0 3px, transparent 4px), radial-gradient(circle at 20% 78%, ${b}66 0 3px, transparent 4px)`, backgroundSize: '54px 54px' })
+    };
+    const PAL = {
+      sogan: ['#EAD9B6', '#6B4A1F'], indigo: ['#D8DCEA', '#3D4870'], pesisir: ['#F1DFD2', '#A34A3F'],
+      madura: ['#F3D69B', '#8E3B2F'], earth: ['#E4D6C0', '#5C4632'], laut: ['#D5E0DC', '#2F5B52'], royal: ['#E9D6C9', '#7A2E3B']
+    };
+    const swatch = (p, c, h) => ({ ...P[p](...PAL[c]), height: (h || 150) + 'px', borderBottom: '1px solid #DCCEAC', animation: 'patDrift 26s linear infinite' });
+
+    // ---------- data ----------
+    const GROUPS = {
+      jawa: 'Jawa', sumatera: { id: 'Sumatera', en: 'Sumatra' }, kalimantan: 'Kalimantan',
+      sulawesi: 'Sulawesi', balint: { id: 'Bali & Nusa Tenggara', en: 'Bali & Nusa Tenggara' },
+      timur: { id: 'Maluku & Papua', en: 'Maluku & Papua' }
+    };
+    const REG = {
+      solo: { n: 'Surakarta (Solo)', p: { id: 'Jawa Tengah', en: 'Central Java' }, g: 'jawa' },
+      yogya: { n: 'Yogyakarta', p: { id: 'DI Yogyakarta', en: 'Yogyakarta Special Region' }, g: 'jawa' },
+      pekalongan: { n: 'Pekalongan', p: { id: 'Jawa Tengah', en: 'Central Java' }, g: 'jawa' },
+      cirebon: { n: 'Cirebon', p: { id: 'Jawa Barat', en: 'West Java' }, g: 'jawa' },
+      lasem: { n: 'Lasem', p: { id: 'Jawa Tengah', en: 'Central Java' }, g: 'jawa' },
+      madura: { n: 'Madura', p: { id: 'Jawa Timur', en: 'East Java' }, g: 'jawa' },
+      tuban: { n: 'Tuban', p: { id: 'Jawa Timur', en: 'East Java' }, g: 'jawa' },
+      tasik: { n: 'Tasikmalaya', p: { id: 'Jawa Barat', en: 'West Java' }, g: 'jawa' },
+      jakarta: { n: 'Jakarta', p: { id: 'DKI Jakarta', en: 'Jakarta' }, g: 'jawa' },
+      banten: { n: 'Banten', p: { id: 'Banten', en: 'Banten' }, g: 'jawa' },
+      jambi: { n: 'Jambi', p: { id: 'Jambi', en: 'Jambi' }, g: 'sumatera' },
+      palembang: { n: 'Palembang', p: { id: 'Sumatera Selatan', en: 'South Sumatra' }, g: 'sumatera' },
+      minang: { n: 'Minangkabau', p: { id: 'Sumatera Barat', en: 'West Sumatra' }, g: 'sumatera' },
+      bengkulu: { n: 'Bengkulu', p: { id: 'Bengkulu', en: 'Bengkulu' }, g: 'sumatera' },
+      banjarmasin: { n: 'Banjarmasin', p: { id: 'Kalimantan Selatan', en: 'South Kalimantan' }, g: 'kalimantan' },
+      palangkaraya: { n: 'Palangka Raya', p: { id: 'Kalimantan Tengah', en: 'Central Kalimantan' }, g: 'kalimantan' },
+      palu: { n: 'Palu', p: { id: 'Sulawesi Tengah', en: 'Central Sulawesi' }, g: 'sulawesi' },
+      toraja: { n: 'Toraja', p: { id: 'Sulawesi Selatan', en: 'South Sulawesi' }, g: 'sulawesi' },
+      bali: { n: 'Bali', p: { id: 'Bali', en: 'Bali' }, g: 'balint' },
+      ntb: { n: 'Sasambo', p: { id: 'Nusa Tenggara Barat', en: 'West Nusa Tenggara' }, g: 'balint' },
+      papua: { n: 'Papua', p: { id: 'Papua', en: 'Papua' }, g: 'timur' },
+      maluku: { n: 'Tanimbar', p: { id: 'Maluku', en: 'Maluku' }, g: 'timur' }
+    };
+    const MOTIFS = [
+      { n: 'Parang', r: 'solo', pt: 'parang', c: 'sogan', d: { id: 'Deretan huruf S menyerupai ombak yang tak pernah berhenti — lambang keteguhan dan kesinambungan. Dahulu motif larangan, khusus keluarga keraton.', en: 'Rows of interlocking S-shapes evoke unceasing waves — perseverance and continuity. Once a forbidden pattern reserved for the royal court.' } },
+      { n: 'Truntum', r: 'solo', pt: 'truntum', c: 'indigo', d: { id: 'Taburan bunga kecil bagai bintang; lambang cinta yang tumbuh kembali. Dikenakan orang tua pengantin agar cinta itu menuntun anaknya.', en: 'Tiny star-like blossoms symbolize love that blooms anew. Worn by the bride\u2019s parents so that love may guide the newlyweds.' } },
+      { n: 'Sidomukti', r: 'solo', pt: 'ceplok', c: 'sogan', d: { id: 'Dari kata sido (jadi) dan mukti (mulia): doa kemakmuran dan kemuliaan. Lazim dikenakan mempelai pada upacara pernikahan Jawa.', en: 'From sido (to become) and mukti (noble): a prayer for prosperity. Traditionally worn by couples at Javanese weddings.' } },
+      { n: 'Kawung', r: 'yogya', pt: 'kawung', c: 'sogan', d: { id: 'Empat lingkaran menyerupai irisan buah aren — kesucian, keadilan, dan pengendalian diri. Salah satu motif tertua di Jawa.', en: 'Four circles echo slices of the sugar-palm fruit — purity, fairness, self-restraint. One of Java\u2019s oldest recorded patterns.' } },
+      { n: 'Sekar Jagad', r: 'yogya', pt: 'floral', c: 'pesisir', d: { id: '\u201cBunga dunia\u201d: bidang-bidang tak beraturan berisi aneka motif, merayakan keindahan dalam keberagaman.', en: '\u201cFlowers of the world\u201d: irregular patches filled with varied motifs, celebrating beauty in diversity.' } },
+      { n: 'Wahyu Tumurun', r: 'yogya', pt: 'floral', c: 'sogan', d: { id: 'Mahkota terbang di tengah sulur bunga: turunnya wahyu dan restu. Harapan akan kedudukan, rezeki, dan petunjuk hidup.', en: 'A winged crown amid floral vines: divine blessing descending — hope for guidance, standing, and good fortune.' } },
+      { n: 'Jlamprang', r: 'pekalongan', pt: 'nitik', c: 'pesisir', d: { id: 'Geometri nitik bertitik rapat, jejak kain patola dari pedagang Gujarat. Bukti Pekalongan sebagai kota pelabuhan yang terbuka.', en: 'Dense dotted geometry tracing patola cloth brought by Gujarati traders — proof of Pekalongan\u2019s openness as a port town.' } },
+      { n: 'Tujuh Rupa', r: 'pekalongan', pt: 'floral', c: 'pesisir', d: { id: 'Flora dan fauna dalam tujuh corak; perpaduan budaya pesisir dengan sentuhan Tionghoa yang kaya warna.', en: 'Flora and fauna in seven interwoven forms; a colorful blend of coastal and Chinese influences.' } },
+      { n: 'Buketan', r: 'pekalongan', pt: 'floral', c: 'indigo', d: { id: 'Rangkaian bunga bergaya Eropa, dipopulerkan pembatik Indo-Belanda abad ke-19 — bukti dialog batik dengan dunia.', en: 'European-style bouquets popularized by 19th-century Indo-Dutch batik makers — batik in dialogue with the world.' } },
+      { n: 'Mega Mendung', r: 'cirebon', pt: 'mega', c: 'indigo', d: { id: 'Awan berlapis pembawa hujan, terinspirasi seni Tiongkok. Pemimpin harus teduh dan sabar, seperti awan yang menyejukkan.', en: 'Layered rain clouds inspired by Chinese art. A leader should bring calm and patience, like clouds that cool the earth.' } },
+      { n: 'Paksinaga Liman', r: 'cirebon', pt: 'lereng', c: 'sogan', d: { id: 'Makhluk gabungan garuda, naga, dan gajah dari kereta Keraton Kasepuhan — kekuatan udara, laut, dan darat.', en: 'A composite of garuda, dragon, and elephant from the Kasepuhan palace carriage — power over air, sea, and land.' } },
+      { n: 'Tiga Negeri', r: 'lasem', pt: 'floral', c: 'royal', d: { id: 'Konon diwarnai di tiga kota: merah Lasem, biru Pekalongan, sogan Solo. Puncak akulturasi Jawa\u2013Tionghoa dalam selembar kain.', en: 'Said to be dyed in three towns: Lasem red, Pekalongan blue, Solo sogan. Peak Javanese\u2013Chinese acculturation on a single cloth.' } },
+      { n: 'Gentongan', r: 'madura', pt: 'floral', c: 'madura', d: { id: 'Direndam berbulan-bulan dalam gentong pewarna alam; makin lama makin dalam warnanya, makin tinggi nilainya.', en: 'Soaked for months in clay vats of natural dye; the longer the soak, the deeper the color and the higher the value.' } },
+      { n: 'Pucuk Tombak', r: 'madura', pt: 'lereng', c: 'madura', d: { id: 'Deretan ujung tombak berjajar — ketajaman pikiran dan keberanian, watak masyarakat pesisir Madura.', en: 'Rows of spearheads in file — sharpness of mind and courage, the temperament of coastal Madura.' } },
+      { n: 'Gedog', r: 'tuban', pt: 'ceplok', c: 'indigo', d: { id: 'Dibatik di atas tenun kapas pintal tangan; bunyi \u201cdog-dog\u201d alat tenunnya memberi nama. Batik sekaligus tenun, satu-satunya di Jawa.', en: 'Drawn on hand-spun, hand-woven cotton; named after the \u201cdog-dog\u201d sound of the loom. Weaving and batik in one — unique in Java.' } },
+      { n: 'Merak Ngibing', r: 'tasik', pt: 'floral', c: 'pesisir', d: { id: 'Sepasang merak menari saling berhadap — keanggunan dan kegembiraan khas Priangan.', en: 'A pair of dancing peacocks face to face — the grace and joy of the Priangan highlands.' } },
+      { n: 'Ondel-Ondel', r: 'jakarta', pt: 'floral', c: 'royal', d: { id: 'Boneka besar penolak bala khas Betawi hadir dalam kain — batik muda yang merayakan ikon kota.', en: 'The great Betawi guardian effigy rendered in cloth — a young batik celebrating the city\u2019s icon.' } },
+      { n: 'Surosowan', r: 'banten', pt: 'ceplok', c: 'earth', d: { id: 'Dinamai dari Keraton Surosowan; warna lembut khas Banten dari sisa sejarah kesultanan yang digali kembali.', en: 'Named for the Surosowan palace; Banten\u2019s soft palette revived from excavated sultanate-era patterns.' } },
+      { n: 'Durian Pecah', r: 'jambi', pt: 'floral', c: 'sogan', d: { id: 'Kulit durian terbelah dua namun tetap bertangkai satu: fondasi iman dan ilmu yang tak terpisahkan.', en: 'A durian split in two yet held by one stem: faith and knowledge as an inseparable foundation.' } },
+      { n: 'Angso Duo', r: 'jambi', pt: 'floral', c: 'indigo', d: { id: 'Dua angsa dari legenda berdirinya Kota Jambi — penunjuk tempat bermukim yang baik, lambang kejelian membaca alam.', en: 'Two swans from the founding legend of Jambi City — guides to good ground, a symbol of reading nature wisely.' } },
+      { n: 'Kembang Jepri', r: 'palembang', pt: 'floral', c: 'royal', d: { id: 'Bunga-bunga bernuansa songket dengan merah dan emas khas Melayu Palembang — kemewahan pesisir Musi.', en: 'Songket-inflected blossoms in Palembang Malay red and gold — the opulence of the Musi riverbanks.' } },
+      { n: 'Tanah Liek', r: 'minang', pt: 'ceplok', c: 'earth', d: { id: 'Kain direndam tanah liat hingga bersemu cokelat — kesederhanaan dan kedekatan orang Minang dengan alamnya.', en: 'Cloth steeped in clay until earth-brown — Minang modesty and closeness to the land.' } },
+      { n: 'Besurek', r: 'bengkulu', pt: 'nitik', c: 'indigo', d: { id: '\u201cBersurat\u201d: goresan menyerupai kaligrafi Arab, membawa doa dan nasihat. Warisan pedagang dan ulama di Bengkulu.', en: '\u201cWith writing\u201d: strokes echoing Arabic calligraphy, carrying prayers and counsel — a legacy of traders and scholars.' } },
+      { n: 'Sasirangan', r: 'banjarmasin', pt: 'lereng', c: 'laut', d: { id: 'Kain adat Banjar yang dijelujur dan diikat sebelum dicelup; dahulu dipercaya sebagai kain penyembuh. Kerabat dekat batik.', en: 'Banjar cloth stitched and bound before dyeing; once believed to heal. A close cousin of batik.' } },
+      { n: 'Benang Bintik', r: 'palangkaraya', pt: 'floral', c: 'sogan', d: { id: 'Menggambar Batang Garing, pohon kehidupan Dayak Ngaju — keseimbangan antara dunia atas dan dunia bawah.', en: 'Depicts the Batang Garing, the Ngaju Dayak tree of life — balance between the upper and lower worlds.' } },
+      { n: 'Bomba', r: 'palu', pt: 'floral', c: 'pesisir', d: { id: 'Berarti \u201cbunga\u201d dalam budaya Kaili — keterbukaan, keramahan, dan kerja sama masyarakat Palu.', en: 'Means \u201cflower\u201d in Kaili culture — the openness, warmth, and cooperation of the people of Palu.' } },
+      { n: "Pa'tedong", r: 'toraja', pt: 'ceplok', c: 'earth', d: { id: 'Tanduk kerbau, hewan paling dimuliakan di Toraja — kemakmuran, status, dan pengikat kerabat.', en: 'Buffalo horns, the most honored animal in Toraja — prosperity, standing, and kinship.' } },
+      { n: 'Pisan Bali', r: 'bali', pt: 'lereng', c: 'sogan', d: { id: 'Motif pisang sebagai doa keselamatan dan harapan baik bagi yang bepergian — kerap menjadi buah tangan.', en: 'Banana motifs as a prayer for safety and good hope for travelers — often given as a parting gift.' } },
+      { n: 'Ulamsari Mas', r: 'bali', pt: 'floral', c: 'laut', d: { id: 'Ikan dan udang emas — rasa syukur masyarakat pesisir Bali atas rezeki laut.', en: 'Golden fish and prawns — coastal Bali\u2019s gratitude for the bounty of the sea.' } },
+      { n: 'Sasambo', r: 'ntb', pt: 'ceplok', c: 'madura', d: { id: 'Akronim Sasak, Samawa, dan Mbojo: tiga suku besar NTB bersatu dalam satu kain.', en: 'An acronym of Sasak, Samawa, and Mbojo: three peoples of West Nusa Tenggara united on one cloth.' } },
+      { n: 'Cendrawasih', r: 'papua', pt: 'floral', c: 'royal', d: { id: 'Burung surga dengan bulu menjuntai — keagungan alam Papua yang wajib dijaga.', en: 'The bird of paradise with trailing plumes — the grandeur of Papua\u2019s nature, to be guarded.' } },
+      { n: 'Asmat', r: 'papua', pt: 'ceplok', c: 'earth', d: { id: 'Terinspirasi ukiran kayu suku Asmat dengan warna tanah dan terakota — penghormatan pada leluhur.', en: 'Inspired by Asmat woodcarving in earth and terracotta tones — homage to the ancestors.' } },
+      { n: 'Tanimbar', r: 'maluku', pt: 'nitik', c: 'indigo', d: { id: 'Menyerap geometri tenun ikat Tanimbar — simbol adat kepulauan yang dituangkan dengan malam.', en: 'Borrowing the geometry of Tanimbar ikat weaving — island customs rendered in wax.' } }
+    ];
+
+    // ---------- UI strings ----------
+    const S = {
+      id: {
+        introKicker: 'Selamat datang di',
+        introLede: 'Perjalanan menyusuri selembar kain yang menyimpan doa, sejarah, dan falsafah hidup — dari keraton Jawa hingga tanah Papua.',
+        asalSkip: 'Lanjut ke Beranda',
+        introCta: 'Masuk ke Website', introSkip: 'Warisan Budaya Takbenda UNESCO · 2009',
+        tagline: 'Warisan Wastra Indonesia', kicker: 'Warisan Budaya Takbenda UNESCO \u00b7 2 Oktober 2009',
+        heroTitle: 'Selembar Kain, Seribu Makna dari Seluruh Nusantara',
+        heroLede: 'Batik bukan sekadar corak — ia bahasa simbol yang digoreskan dengan malam panas, dari keraton Jawa hingga pesisir Papua. Jelajahi motif, filosofi, dan tangan-tangan yang menjaganya.',
+        hero3dCta: 'Buka versi interaktif \u2192',
+        ctaPeta: 'Jelajahi Peta', ctaGaleri: 'Lihat Galeri Motif', ctaSejarah: 'Baca Sejarah & Proses',
+        stat1: 'Motif Terdokumentasi', stat2: 'Daerah Sentra', stat3: 'Pengakuan UNESCO', stat4: 'Teknik Utama',
+        featTitle: 'Motif Pilihan', featSub: 'Empat motif yang mewakili perjalanan batik dari keraton hingga pesisir.',
+        mediaTitle: 'Jelajahi Lebih Jauh', mediaSub: 'Pengalaman interaktif untuk mengenal batik lebih dekat.', mediaAll: 'Lihat semua media',
+        mediaGame: 'Game: Jejak Batik', mediaGameDesc: 'Petualangan 6 bab — baca kisah asal usul, jawab tantangannya, raih gelar Empu Batik.',
+        mediaGame3d: 'Game 3D: Membatik', mediaGame3dDesc: 'Jadilah pembatik di meja 3D — toreh canting, tembok malam, celup nila, rebus, dan cap sendiri kainmu.',
+        mediaAsal: 'Asal Usul Batik (3D + Suara)', mediaAsalDesc: 'Film animasi 3D bersuara ±4 menit — enam bab asal usul batik secara rinci, dari kata amba nitik hingga UNESCO.',
+        mediaVideo: 'Video Animasi Batik', mediaVideoDesc: 'Animasi 18 detik: dari goresan canting hingga selembar Batik Nusantara.',
+        mediaStudio: 'Studio Batik', mediaStudioDesc: 'Rancang motif batikmu sendiri di kanvas: cap motif, warnai, gambar bebas \u2014 lalu unduh atau lihat sebagai kain 3D.',
+        media3dAnim: 'Animasi 3D Kain Berkibar', media3dAnimDesc: 'Kain batik 3D yang berkibar tertiup angin — animasi WebGL langsung di browser.',
+        media3d: 'Canting & Kain 3D', media3dDesc: 'Objek 3D interaktif — putar, perbesar, dan unduh model canting di atas kain batik.',
+        quote: '\u201cBatik adalah cara orang Indonesia menuliskan doa, harapan, dan sejarahnya — bukan di atas kertas, melainkan di atas kain.\u201d',
+        quoteBy: 'Filosofi Wastra Nusantara',
+        petaTitle: 'Peta Sentra Batik', petaSub: 'Klik titik pada peta — atau nama daerah di bawahnya — untuk melihat motif khas dan filosofinya.',
+        mapHint: 'Pilih sebuah titik pada peta untuk mulai menjelajah.',
+        rute: 'Rute ke Sana', ruteHint: 'Buka Google Maps — rute dari lokasi Anda sekarang.',
+        galeriTitle: 'Galeri Motif & Filosofi', galeriSub: 'Tiga puluh lebih motif dari seluruh Indonesia, masing-masing dengan makna yang diwariskan turun-temurun.',
+        swatchNote: 'Corak pada kartu adalah representasi bergaya, bukan reproduksi motif asli. Foto kain sungguhan dapat ditambahkan kemudian.',
+        sejarahTitle: 'Sejarah Batik', sejarahSub: 'Dari tradisi keraton yang tertutup hingga diakui dunia — perjalanan panjang selembar kain.',
+        prosesTitle: 'Proses Batik Tulis', prosesSub: 'Satu kain batik tulis melewati siklus canting, pewarnaan, dan perebusan yang dapat berulang berkali-kali.',
+        jenisTitle: 'Tulis, Cap, atau Printing?', jenisSub: 'Ketiganya tampak serupa dari jauh — nilai dan keasliannya sangat berbeda.',
+        kPeta: '22 Sentra · Peta Interaktif', kGaleri: '33 Motif · Filosofi', kSejarah: 'Abad ke-6 hingga 2009',
+        kPengrajin: 'Kampung & Empu', kMedia: '7 Pengalaman Interaktif', kPanduan: 'Praktik & Istilah', kTentang: 'Kelompok & Rujukan',
+        searchPh: 'Cari motif, daerah, atau makna…', noResult: 'Motif tidak ditemukan. Coba kata kunci lain.',
+        panduanTitle: 'Mengenali Batik Asli', panduanSub: 'Empat cara sederhana membedakan batik tulis, batik cap, dan kain bermotif batik — berguna sebelum membeli.',
+        rawatTitle: 'Cara Merawat Batik', rawatSub: 'Batik berpewarna alam menua dengan indah bila dirawat benar. Ini yang boleh dan tidak boleh dilakukan.',
+        glosTitle: 'Glosarium Istilah', glosSub: 'Kosakata dunia batik yang muncul di sepanjang situs ini.',
+        timTitle: 'Kelompok Zenith Dinamika', timSub: 'Tim yang menyusun riset, konten, desain, dan pengembangan situs Batik Nusantara.',
+        timNote: 'Peran dapat disesuaikan melalui mode edit.',
+        pustakaTitle: 'Sumber & Daftar Pustaka', pustakaSub: 'Rujukan utama yang menjadi dasar konten sejarah, motif, dan filosofi di situs ini.',
+        sentraTitle: 'Sentra & Pengrajin', sentraSub: 'Kampung-kampung batik tempat keterampilan ini hidup dan diwariskan setiap hari.',
+        footLeft: 'Dibuat untuk edukasi dan pengenalan budaya oleh Kelompok Zenith Dinamika.', footNote: 'Seluruh corak adalah ilustrasi bergaya untuk keperluan edukasi.',
+        footLede: 'Ensiklopedia kecil wastra Indonesia — motif, filosofi, sejarah, dan para penjaganya.',
+        footNav: 'Jelajahi', footNoteTitle: 'Catatan', footDay: 'Hari Batik Nasional · 2 Oktober'
+      },
+      en: {
+        introKicker: 'Welcome to',
+        introLede: 'A journey through a single cloth that holds prayers, history, and a philosophy of life — from the courts of Java to the shores of Papua.',
+        asalSkip: 'Continue to Home',
+        introCta: 'Enter the Website', introSkip: 'UNESCO Intangible Cultural Heritage · 2009',
+        tagline: 'Indonesia\u2019s Textile Heritage', kicker: 'UNESCO Intangible Cultural Heritage \u00b7 2 October 2009',
+        heroTitle: 'One Cloth, a Thousand Meanings from Across the Archipelago',
+        heroLede: 'Batik is more than pattern — it is a symbolic language drawn in hot wax, from the royal courts of Java to the shores of Papua. Explore the motifs, their philosophies, and the hands that keep them alive.',
+        hero3dCta: 'Open interactive version \u2192',
+        ctaPeta: 'Explore the Map', ctaGaleri: 'View the Gallery', ctaSejarah: 'Read History & Process',
+        stat1: 'Documented Motifs', stat2: 'Batik Regions', stat3: 'UNESCO Recognition', stat4: 'Main Techniques',
+        featTitle: 'Featured Motifs', featSub: 'Four motifs that trace batik\u2019s journey from palace to coast.',
+        mediaTitle: 'Explore Further', mediaSub: 'Interactive experiences to get closer to batik.', mediaAll: 'See all media',
+        mediaGame: 'Game: Batik Trail', mediaGameDesc: 'A 6-chapter adventure — read the origin story, beat each challenge, earn the Batik Master title.',
+        mediaGame3d: '3D Game: Make Batik', mediaGame3dDesc: 'Become a batik maker at a 3D table — wax, seal, dye, boil, and stamp your own cloth.',
+        mediaAsal: 'Origins of Batik (3D + Voice)', mediaAsalDesc: 'A ±4-minute narrated 3D film — six detailed chapters on batik\u2019s origins, from the word amba nitik to UNESCO.',
+        mediaVideo: 'Batik Animation Video', mediaVideoDesc: 'An 18-second animation: from the canting\u2019s first stroke to a full Batik Nusantara.',
+        mediaStudio: 'Batik Studio', mediaStudioDesc: 'Design your own batik on a canvas: stamp motifs, pick colors, draw freely \u2014 then download it or see it as 3D cloth.',
+        media3dAnim: 'Waving Cloth 3D Animation', media3dAnimDesc: 'A 3D batik cloth rippling in the wind — live WebGL animation in the browser.',
+        media3d: 'Canting & Cloth in 3D', media3dDesc: 'Interactive 3D object — rotate, zoom, and download a canting resting on batik cloth.',
+        quote: '\u201cBatik is how Indonesians write their prayers, hopes, and history — not on paper, but on cloth.\u201d',
+        quoteBy: 'Philosophy of Nusantara Textiles',
+        petaTitle: 'Map of Batik Centers', petaSub: 'Click a dot on the map — or a region name below it — to see its signature motifs and their meanings.',
+        mapHint: 'Select a point on the map to start exploring.',
+        rute: 'Get Directions', ruteHint: 'Opens Google Maps — route from your current location.',
+        galeriTitle: 'Motif & Philosophy Gallery', galeriSub: 'More than thirty motifs from across Indonesia, each carrying meaning passed down through generations.',
+        swatchNote: 'Card patterns are stylized representations, not reproductions of the original motifs. Photographs of real cloth can be added later.',
+        sejarahTitle: 'A History of Batik', sejarahSub: 'From a closed court tradition to world recognition — the long journey of a single cloth.',
+        prosesTitle: 'The Hand-Drawn Process', prosesSub: 'One hand-drawn batik passes through cycles of waxing, dyeing, and boiling — often repeated many times.',
+        jenisTitle: 'Tulis, Cap, or Print?', jenisSub: 'They look alike from a distance — their value and authenticity differ greatly.',
+        kPeta: '22 Centers · Interactive Map', kGaleri: '33 Motifs · Philosophy', kSejarah: '6th Century to 2009',
+        kPengrajin: 'Villages & Masters', kMedia: '7 Interactive Experiences', kPanduan: 'Practice & Terms', kTentang: 'Team & References',
+        searchPh: 'Search motifs, regions, or meanings…', noResult: 'No motifs found. Try another keyword.',
+        panduanTitle: 'Recognizing Real Batik', panduanSub: 'Four simple ways to tell hand-drawn batik, stamped batik, and batik-printed cloth apart — useful before you buy.',
+        rawatTitle: 'Caring for Batik', rawatSub: 'Naturally dyed batik ages beautifully when cared for properly. Here is what to do and what to avoid.',
+        glosTitle: 'Glossary of Terms', glosSub: 'The vocabulary of batik that appears throughout this site.',
+        timTitle: 'The Zenith Dinamika Team', timSub: 'The team behind the research, content, design, and development of Batik Nusantara.',
+        timNote: 'Roles can be adjusted via edit mode.',
+        pustakaTitle: 'Sources & Bibliography', pustakaSub: 'The main references behind the history, motifs, and philosophy on this site.',
+        sentraTitle: 'Centers & Artisans', sentraSub: 'The batik villages where this craft lives and is passed on every day.',
+        footLeft: 'Made for cultural education by the Zenith Dinamika team.', footNote: 'All patterns shown are stylized illustrations for educational purposes.',
+        footLede: 'A small encyclopedia of Indonesian textiles — motifs, philosophy, history, and their keepers.',
+        footNav: 'Explore', footNoteTitle: 'Note', footDay: 'National Batik Day · 2 October'
+      }
+    };
+    const L = S[lang];
+
+    const TIMELINE = [
+      { era: { id: 'Abad ke-6\u201313', en: '6th\u201313th c.' }, d: { id: 'Teknik rintang lilin (wax-resist) telah dikenal di Nusantara; kain berpola menjadi bagian upacara dan penanda status di kerajaan-kerajaan awal.', en: 'Wax-resist dyeing is already known in the archipelago; patterned cloth marks ceremony and status in early kingdoms.' } },
+      { era: { id: 'Abad ke-14\u201317', en: '14th\u201317th c.' }, d: { id: 'Di lingkungan keraton Jawa, batik menjadi busana bangsawan. Lahir motif-motif larangan seperti Parang dan Kawung yang hanya boleh dikenakan keluarga raja.', en: 'In the Javanese courts batik becomes noble dress. \u201cForbidden\u201d patterns like Parang and Kawung emerge, reserved for royalty.' } },
+      { era: { id: 'Abad ke-17\u201319', en: '17th\u201319th c.' }, d: { id: 'Jalur dagang pesisir melahirkan batik pesisir yang berwarna cerah — Pekalongan, Lasem, Cirebon, Madura — menyerap pengaruh Tiongkok, Arab, India, dan Eropa.', en: 'Coastal trade routes give rise to vividly colored pesisir batik — Pekalongan, Lasem, Cirebon, Madura — absorbing Chinese, Arab, Indian, and European influences.' } },
+      { era: { id: 'Tahun 1840-an', en: '1840s' }, d: { id: 'Canting cap dari tembaga ditemukan; produksi meluas dari keraton ke rakyat, dan batik menjadi pakaian sehari-hari.', en: 'The copper stamp (cap) is invented; production spreads from palace to people, and batik becomes everyday wear.' } },
+      { era: { id: '2 Oktober 2009', en: '2 October 2009' }, d: { id: 'UNESCO menetapkan batik Indonesia sebagai Warisan Budaya Takbenda Kemanusiaan. Tanggal ini diperingati sebagai Hari Batik Nasional.', en: 'UNESCO inscribes Indonesian batik as Intangible Cultural Heritage of Humanity. The date is now National Batik Day.' } }
+    ];
+    const PROSES = [
+      { n: '01', name: { id: 'Nyorek', en: 'Nyorek' }, d: { id: 'Pola digambar tipis dengan pensil di atas kain mori putih.', en: 'The pattern is lightly sketched in pencil on white mori cloth.' } },
+      { n: '02', name: { id: 'Nglowong', en: 'Nglowong' }, d: { id: 'Garis pola ditorehkan dengan malam panas memakai canting — tahap paling menentukan.', en: 'Outlines are drawn in hot wax with the canting pen — the defining step.' } },
+      { n: '03', name: { id: 'Nembok', en: 'Nembok' }, d: { id: 'Bidang yang ingin tetap terang \u201cditembok\u201d dengan malam agar tak termakan warna.', en: 'Areas meant to stay light are \u201cwalled\u201d with wax to resist the dye.' } },
+      { n: '04', name: { id: 'Medel / Nyelup', en: 'Dyeing' }, d: { id: 'Kain dicelup ke pewarna — dahulu nila dan soga dari tumbuhan. Diulang untuk tiap warna.', en: 'The cloth is dipped in dye — once indigo and soga from plants. Repeated for every color.' } },
+      { n: '05', name: { id: 'Nglorod', en: 'Nglorod' }, d: { id: 'Kain direbus untuk meluruhkan malam. Untuk motif rumit, seluruh siklus diulang dari awal.', en: 'The cloth is boiled to release the wax. For complex motifs the whole cycle starts again.' } }
+    ];
+    const JENIS = [
+      { pt: 'parang', c: 'sogan', name: { id: 'Batik Tulis', en: 'Hand-Drawn (Tulis)' }, time: { id: '2 minggu \u2013 6 bulan / kain', en: '2 weeks \u2013 6 months per cloth' }, d: { id: 'Digambar sepenuhnya dengan canting. Tak ada dua helai yang sama; goresannya tembus ke kedua sisi kain. Paling tinggi nilainya.', en: 'Drawn entirely by canting. No two cloths are alike; the wax penetrates both sides. The most valued form.' } },
+      { pt: 'ceplok', c: 'indigo', name: { id: 'Batik Cap', en: 'Stamped (Cap)' }, time: { id: '2 \u2013 3 hari / kain', en: '2 \u2013 3 days per cloth' }, d: { id: 'Malam dicapkan dengan stempel tembaga. Pola berulang rapi dan harga lebih terjangkau — tetap batik asli karena memakai malam.', en: 'Wax is applied with a copper stamp. Neatly repeating and more affordable — still true batik, for it uses wax.' } },
+      { pt: 'lereng', c: 'pesisir', name: { id: 'Tekstil Motif Batik', en: 'Batik-Print Textile' }, time: { id: 'Menit / kain', en: 'Minutes per cloth' }, d: { id: 'Dicetak mesin tanpa malam sama sekali. Secara tradisi bukan batik — sebutan tepatnya kain bermotif batik. Kenali sebelum membeli.', en: 'Machine-printed with no wax at all. By tradition, not batik — properly \u201cbatik-patterned cloth.\u201d Know it before you buy.' } }
+    ];
+    const SENTRA = [
+      { pt: 'parang', c: 'sogan', name: 'Kampung Batik Laweyan', place: { id: 'Surakarta, Jawa Tengah', en: 'Surakarta, Central Java' }, d: { id: 'Kampung saudagar batik sejak abad ke-16; gang-gang sempitnya dipenuhi rumah produksi dan galeri keluarga.', en: 'A batik merchants\u2019 quarter since the 16th century; its narrow lanes are lined with family workshops and galleries.' } },
+      { pt: 'kawung', c: 'sogan', name: 'Giriloyo', place: { id: 'Imogiri, Yogyakarta', en: 'Imogiri, Yogyakarta' }, d: { id: 'Sekitar 600 pembatik tulis, mayoritas perempuan, menjaga motif halus keraton di kaki bukit makam raja-raja Mataram.', en: 'Some 600 hand-batik artisans, mostly women, keep the fine court motifs alive below the royal tombs of Mataram.' } },
+      { pt: 'floral', c: 'pesisir', name: 'Kampoeng Batik Kauman', place: { id: 'Pekalongan, Jawa Tengah', en: 'Pekalongan, Central Java' }, d: { id: 'Jantung \u201cKota Batik\u201d dan rumah Museum Batik Pekalongan; pusat batik pesisir penuh warna sejak era dagang.', en: 'The heart of the \u201cCity of Batik\u201d and home to the Pekalongan Batik Museum; a hub of colorful coastal batik since the trading era.' } },
+      { pt: 'mega', c: 'indigo', name: 'Kampung Batik Trusmi', place: { id: 'Cirebon, Jawa Barat', en: 'Cirebon, West Java' }, d: { id: 'Sentra Mega Mendung dengan ratusan perajin dan ruang pamer; tradisinya dijaga sejak era Sunan Gunung Jati.', en: 'The center of Mega Mendung with hundreds of artisans and showrooms; its tradition traces to the era of Sunan Gunung Jati.' } },
+      { pt: 'floral', c: 'madura', name: 'Tanjung Bumi', place: { id: 'Bangkalan, Madura', en: 'Bangkalan, Madura' }, d: { id: 'Kampung nelayan tempat lahirnya gentongan; membatik menjadi pekerjaan perempuan menanti suami melaut.', en: 'A fishing village and birthplace of gentongan; batik grew as the craft of women awaiting their husbands\u2019 return from sea.' } },
+      { pt: 'nitik', c: 'sogan', name: 'Kampung Batik Jambi', place: { id: 'Seberang Kota Jambi', en: 'Jambi City, across the river' }, d: { id: 'Di tepi Batanghari, perajin menghidupkan kembali motif Melayu Jambi dengan pewarna alam kayu dan getah.', en: 'On the Batanghari riverbank, artisans revive Jambi Malay motifs with natural dyes from wood and sap.' } }
+    ];
+
+    const KENALI = [
+      { tag: { id: 'Ciri Batik Tulis', en: 'Signs of Tulis' }, name: { id: 'Lihat Kedua Sisi Kain', en: 'Check Both Sides' },
+        d: { id: 'Pada batik tulis, malam menembus kain sehingga motif di sisi belakang hampir sama jelasnya dengan sisi depan. Kain printing hanya bermotif di satu sisi.', en: 'In hand-drawn batik the wax soaks through, so the reverse side is almost as clear as the front. Printed cloth carries the pattern on one side only.' } },
+      { tag: { id: 'Ciri Batik Tulis', en: 'Signs of Tulis' }, name: { id: 'Cari Ketidaksempurnaan', en: 'Look for Imperfection' },
+        d: { id: 'Garis batik tulis sedikit bergetar dan ukuran motifnya tak pernah persis sama. Justru keteraturan yang terlalu sempurna menandakan mesin.', en: 'Hand-drawn lines waver slightly and motifs are never identical. Perfect regularity is the mark of a machine.' } },
+      { tag: { id: 'Ciri Batik Cap', en: 'Signs of Cap' }, name: { id: 'Pola Berulang Rapi', en: 'Neatly Repeating Blocks' },
+        d: { id: 'Batik cap menampilkan blok motif berulang dengan sambungan yang kadang terlihat. Tetap batik asli karena memakai malam — harganya lebih terjangkau.', en: 'Stamped batik shows repeating blocks with visible seams. It is still true batik because wax is used — and it costs less.' } },
+      { tag: { id: 'Bukan Batik', en: 'Not Batik' }, name: { id: 'Warna Terlalu Rata', en: 'Flawless, Flat Color' },
+        d: { id: 'Kain printing berwarna sangat rata, tanpa aroma malam, dan biasanya sangat murah per meter. Sebutan tepatnya kain bermotif batik.', en: 'Printed cloth has perfectly flat color, no wax scent, and is very cheap per meter. Properly called batik-patterned cloth.' } }
+    ];
+    const RAWAT = [
+      { ok: true, d: { id: 'Cuci dengan tangan memakai air dingin dan lerak (buah klerak) atau sampo bayi.', en: 'Hand-wash in cold water with lerak (soapberry) or baby shampoo.' } },
+      { ok: false, d: { id: 'Jangan gunakan deterjen, pemutih, atau mesin cuci — warna alami akan pudar.', en: 'Never use detergent, bleach, or a washing machine — natural dyes will fade.' } },
+      { ok: true, d: { id: 'Jemur di tempat teduh dan berangin, jangan diperas; cukup diangin-anginkan.', en: 'Dry in a shaded, breezy spot; do not wring — just let it air out.' } },
+      { ok: false, d: { id: 'Hindari sinar matahari langsung, terutama untuk kain berpewarna alam.', en: 'Avoid direct sunlight, especially for naturally dyed cloth.' } },
+      { ok: true, d: { id: 'Setrika dengan suhu sedang dan lapisi kain lain di atasnya.', en: 'Iron on medium heat with another cloth laid over it.' } },
+      { ok: true, d: { id: 'Simpan digulung, bukan dilipat, dan beri merica atau akar wangi \u2014 bukan kapur barus.', en: 'Store rolled, not folded, with peppercorns or vetiver root \u2014 not mothballs.' } }
+    ];
+    const GLOS = [
+      { t: 'Amba nitik', d: { id: 'Akar kata \u201cbatik\u201d dalam bahasa Jawa: amba (menulis) dan nitik (membuat titik).', en: 'The Javanese root of \u201cbatik\u201d: amba (to write) and nitik (to make dots).' } },
+      { t: 'Canting', d: { id: 'Alat tulis batik dari tembaga bergagang bambu, berisi malam panas yang mengalir lewat cucuk.', en: 'The copper-and-bamboo pen holding hot wax that flows through its spout.' } },
+      { t: 'Cap', d: { id: 'Stempel tembaga untuk mengecapkan malam ke kain; ditemukan sekitar tahun 1840-an.', en: 'A copper stamp used to apply wax to cloth; invented around the 1840s.' } },
+      { t: 'Malam', d: { id: 'Lilin batik campuran lilin lebah, damar, dan parafin yang menolak warna saat pencelupan.', en: 'Batik wax \u2014 beeswax, resin, and paraffin \u2014 that resists dye during dipping.' } },
+      { t: 'Mori', d: { id: 'Kain katun putih polos yang menjadi bahan dasar batik.', en: 'The plain white cotton cloth used as the base for batik.' } },
+      { t: 'Gawangan', d: { id: 'Rangka kayu tempat kain digantung selama proses membatik.', en: 'The wooden frame on which cloth is hung while being batiked.' } },
+      { t: 'Nglowong', d: { id: 'Tahap menorehkan garis pola utama dengan malam \u2014 tahap paling menentukan.', en: 'Drawing the main outlines in wax \u2014 the defining stage.' } },
+      { t: 'Nembok', d: { id: 'Menutup bidang yang ingin tetap terang dengan malam tebal agar menolak warna.', en: 'Sealing areas meant to stay light with thick wax so they resist dye.' } },
+      { t: 'Medel', d: { id: 'Pencelupan kain ke dalam larutan pewarna, diulang untuk setiap warna.', en: 'Dipping the cloth into dye, repeated for each color.' } },
+      { t: 'Nglorod', d: { id: 'Merebus kain agar malam luruh dan motif akhirnya muncul.', en: 'Boiling the cloth so the wax releases and the motif finally appears.' } },
+      { t: 'Soga', d: { id: 'Warna cokelat khas keraton dari kulit kayu soga, tingi, dan tegeran.', en: 'The court\u2019s signature brown, from soga, tingi, and tegeran bark.' } },
+      { t: 'Nila / Indigo', d: { id: 'Pewarna biru dari daun tanaman nila yang difermentasi berhari-hari.', en: 'Blue dye from indigo leaves fermented over several days.' } },
+      { t: 'Motif larangan', d: { id: 'Motif yang dahulu hanya boleh dikenakan raja dan kerabat keraton, seperti Parang dan Kawung.', en: 'Patterns once reserved for the king and court, such as Parang and Kawung.' } },
+      { t: 'Batik pesisir', d: { id: 'Batik kota pelabuhan yang cerah dan terbuka pada pengaruh Tiongkok, Arab, India, dan Eropa.', en: 'Bright port-town batik open to Chinese, Arab, Indian, and European influence.' } },
+      { t: 'Gentongan', d: { id: 'Batik Madura yang direndam berbulan-bulan dalam gentong pewarna alam.', en: 'Madurese batik soaked for months in clay vats of natural dye.' } }
+    ];
+    const TIM = [
+      { n: 'Muhammad Rasya Zikriyansyah', r: { id: 'Ketua Kelompok', en: 'Team Lead' } },
+      { n: 'Waffir Hasan Alkamiil', r: { id: 'Pengembangan Web', en: 'Web Development' } },
+      { n: 'Muhammad Naufal Farizy', r: { id: 'Desain Visual', en: 'Visual Design' } },
+      { n: 'Muhammad Fatan Alfarizi', r: { id: 'Media & Presentasi', en: 'Media & Presentation' } },
+      { n: 'Nufail Hizam', r: { id: 'Riset & Konten', en: 'Research & Content' } }
+    ];
+    const PUSTAKA = [
+      { t: 'UNESCO. \u201cIndonesian Batik\u201d, Representative List of the Intangible Cultural Heritage of Humanity, inskripsi 2 Oktober 2009.', k: { id: 'Dokumen Resmi', en: 'Official Record' } },
+      { t: 'Museum Batik Pekalongan \u2014 koleksi dan dokumentasi batik pesisir.', k: { id: 'Museum', en: 'Museum' } },
+      { t: 'Museum Batik Danar Hadi, Surakarta \u2014 koleksi batik keraton dan batik Tiga Negeri.', k: { id: 'Museum', en: 'Museum' } },
+      { t: 'Kementerian Pendidikan dan Kebudayaan RI \u2014 data Warisan Budaya Takbenda Indonesia.', k: { id: 'Lembaga Pemerintah', en: 'Government Body' } },
+      { t: 'Kampung Batik Laweyan (Surakarta), Giriloyo (Imogiri), Trusmi (Cirebon), Tanjung Bumi (Madura) \u2014 profil sentra dan praktik pembatik.', k: { id: 'Observasi Sentra', en: 'Center Profiles' } },
+      { t: 'Hari Batik Nasional \u2014 Keputusan Presiden RI yang menetapkan 2 Oktober sebagai peringatan nasional.', k: { id: 'Dokumen Resmi', en: 'Official Record' } }
+    ];
+
+    // ---------- derived view data ----------
+    const page = this.state.page;
+    const localizeMotif = (m) => ({
+      name: m.n, regionName: REG[m.r].n, group: t(GROUPS[REG[m.r].g]), phil: t(m.d),
+      swatch: swatch(m.pt, m.c, 150)
+    });
+    const filter = this.state.filter;
+    const q = (this.state.query || '').trim().toLowerCase();
+    const matchQ = (m) => !q || [m.n, REG[m.r].n, t(REG[m.r].p), t(m.d)].join(' ').toLowerCase().includes(q);
+    const motifs = MOTIFS.filter(m => (filter === 'all' || REG[m.r].g === filter) && matchQ(m))
+      .map(localizeMotif)
+      .map((m, i) => {
+        const big = i % 7 === 0;
+        return { ...m, swatch: { ...m.swatch, height: big ? '250px' : (i % 3 === 1 ? '180px' : '150px') },
+          cardStyle: big ? { gridColumn: 'span 2' } : {} };
+      });
+    const featured = ['Parang', 'Kawung', 'Mega Mendung', 'Tiga Negeri']
+      .map(n => localizeMotif(MOTIFS.find(m => m.n === n)));
+    const cubeFace = (pat, col, tf) => ({ position: 'absolute', width: '120px', height: '120px', border: '1px solid #B99C5E', transform: tf, ...P[pat](...PAL[col]) });
+    const cubes = [
+      { pat: 'parang', col: 'sogan', name: 'Parang', region: { id: 'Surakarta', en: 'Surakarta' }, alt: ['kawung', 'sogan'] },
+      { pat: 'mega', col: 'indigo', name: 'Mega Mendung', region: { id: 'Cirebon', en: 'Cirebon' }, alt: ['floral', 'indigo'] },
+      { pat: 'truntum', col: 'madura', name: 'Gentongan', region: { id: 'Madura', en: 'Madura' }, alt: ['lereng', 'madura'] }
+    ].map(c => ({
+      name: c.name, region: t(c.region),
+      f1: cubeFace(c.pat, c.col, 'translateZ(60px)'),
+      f2: cubeFace(c.alt[0], c.alt[1], 'rotateY(90deg) translateZ(60px)'),
+      f3: cubeFace(c.pat, c.col, 'rotateY(180deg) translateZ(60px)'),
+      f4: cubeFace(c.alt[0], c.alt[1], 'rotateY(270deg) translateZ(60px)'),
+      top: { position: 'absolute', width: '120px', height: '120px', border: '1px solid #B99C5E', background: '#EAD9B6', transform: 'rotateX(90deg) translateZ(60px)' },
+      bot: { position: 'absolute', width: '120px', height: '120px', border: '1px solid #B99C5E', background: '#E3D3AE', transform: 'rotateX(-90deg) translateZ(60px)' }
+    }));
+    const bandPats = [['parang','sogan'],['mega','indigo'],['kawung','sogan'],['floral','pesisir'],['nitik','indigo'],['truntum','madura']];
+    const band = bandPats.map(([p, c], i) => ({ name: p, style: { ...P[p](...PAL[c]), flex: 1, borderLeft: i ? '1px solid #DCCEAC' : 'none', animation: `patDrift ${14 + i * 3}s linear infinite${i % 2 ? ' reverse' : ''}` } }));
+    const stats = [
+      { n: '33', l: L.stat1 }, { n: '22', l: L.stat2 }, { n: '2009', l: L.stat3 }, { n: '3', l: L.stat4 }
+    ];
+    const navDefs = [
+      ['beranda', { id: 'Beranda', en: 'Home' }], ['peta', { id: 'Peta', en: 'Map' }],
+      ['galeri', { id: 'Galeri', en: 'Gallery' }], ['sejarah', { id: 'Sejarah & Proses', en: 'History & Process' }],
+      ['pengrajin', { id: 'Pengrajin', en: 'Artisans' }], ['media', { id: 'Media', en: 'Media' }]
+    ];
+    const footerDefs = [...navDefs, ['panduan', { id: 'Panduan', en: 'Guide' }], ['tentang', { id: 'Tentang', en: 'About' }]];
+    const navBase = { background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '14.5px', padding: '8px 11px', borderRadius: '999px', color: '#5C4E3B', whiteSpace: 'nowrap', transition: 'background 0.25s, color 0.25s' };
+    const navItems = navDefs.map(([k, lbl]) => ({
+      label: t(lbl), go: () => this.go(k),
+      style: page === k ? { ...navBase, color: '#2B2118', fontWeight: 800, background: '#EADFC4' } : navBase
+    }));
+    const footerNav = footerDefs.map(([k, lbl]) => ({ label: t(lbl), go: () => this.go(k) }));
+    const langBase = { border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: "'Alegreya Sans', sans-serif", fontSize: '13px', fontWeight: 700, padding: '7px 12px', color: '#8A7657' };
+    const langOn = { ...langBase, background: '#44507E', color: '#F6F0E2' };
+    const chipBase = { border: '1px solid #C9B685', background: '#FBF6E9', color: '#5C4E3B', borderRadius: '999px', padding: '7px 16px', fontSize: '13.5px', fontFamily: "'Alegreya Sans', sans-serif", cursor: 'pointer' };
+    const chipOn = { ...chipBase, background: '#44507E', borderColor: '#44507E', color: '#F6F0E2', fontWeight: 700 };
+    const chips = [['all', { id: 'Semua', en: 'All' }], ...Object.entries(GROUPS)].map(([k, lbl]) => ({
+      label: t(lbl), go: () => this.setState({ filter: k }), style: filter === k ? chipOn : chipBase
+    }));
+    const sel = this.state.sel;
+    const regionChips = Object.entries(REG).map(([k, r]) => ({
+      label: r.n, go: () => this.pickRegion(k), style: sel === k ? chipOn : chipBase
+    }));
+    const selMotifs = sel ? MOTIFS.filter(m => m.r === sel).map(localizeMotif) : [];
+    let gmapsUrl = '#';
+    if (sel && window.BATIK_REGIONS) {
+      const rr = window.BATIK_REGIONS.find(x => x.id === sel);
+      if (rr) gmapsUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(rr.c[1] + ',' + rr.c[0]) + '&travelmode=driving';
+    }
+
+    return {
+      L, lang, navItems, stats, band, featured, motifs, chips,
+      regionChips, selMotifs,
+      hasSel: !!sel, noSel: !sel, gmapsUrl,
+      selName: sel ? REG[sel].n : '', selProv: sel ? t(REG[sel].p) : '',
+      showIntro: (this.props.intro ?? true) && this.state.intro,
+      introWrapStyle: this.state.introFade ? { opacity: 0, pointerEvents: 'none' } : { opacity: 1 },
+      enterSite: this.enterSite,
+      showAsal: this.state.asal,
+      asalWrapStyle: this.state.asalFade ? { opacity: 0, pointerEvents: 'none' } : { opacity: 1 },
+      skipAsal: this.skipAsal,
+      showBeranda: page === 'beranda', showPeta: page === 'peta', showGaleri: page === 'galeri',
+      showSejarah: page === 'sejarah', showPengrajin: page === 'pengrajin',
+      showPanduan: page === 'panduan', showTentang: page === 'tentang',
+      showMedia: page === 'media', goMedia: () => this.go('media'), footerNav, cubes,
+      query: this.state.query || '',
+      onSearch: (e) => this.setState({ query: e.target.value }),
+      resultCount: motifs.length + ' ' + t({ id: 'motif', en: 'motifs' }),
+      noResult: motifs.length === 0,
+      kenali: KENALI.map(x => ({ tag: t(x.tag), name: t(x.name), desc: t(x.d) })),
+      rawat: RAWAT.map(x => ({
+        text: t(x.d), mark: x.ok ? '\u2713' : '\u2717',
+        markStyle: { minWidth: '24px', height: '24px', borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: '13px', fontWeight: 800, color: '#F6F0E2', background: x.ok ? '#5B7247' : '#A34A3F' }
+      })),
+      glosarium: GLOS.map(x => ({ term: x.t, def: t(x.d) })),
+      tim: TIM.map((x, i) => ({
+        name: x.n, role: t(x.r),
+        avatar: { ...P[['kawung','parang','mega','truntum','ceplok','floral'][i % 6]](...PAL[['sogan','indigo','pesisir','madura','earth','laut'][i % 6]]), width: '72px', height: '72px', borderRadius: '50%', border: '1px solid #C9B685', margin: '0 auto' }
+      })),
+      pustaka: PUSTAKA.map((x, i) => ({ n: String(i + 1).padStart(2, '0'), text: x.t, kind: t(x.k) })),
+      goBeranda: () => this.go('beranda'), goPeta: () => this.go('peta'),
+      goGaleri: () => this.go('galeri'), goSejarah: () => this.go('sejarah'),
+      setId: () => this.setState({ lang: 'id' }), setEn: () => this.setState({ lang: 'en' }),
+      idBtnStyle: lang === 'id' ? langOn : langBase, enBtnStyle: lang === 'en' ? langOn : langBase,
+      mapLabelsAttr: (this.props.mapLabels ?? true) ? 'on' : 'off',
+      timeline: TIMELINE.map(x => ({ era: t(x.era), text: t(x.d) })),
+      proses: PROSES.map(x => ({ n: x.n, name: t(x.name), desc: t(x.d) })),
+      jenis: JENIS.map(x => ({ name: t(x.name), time: t(x.time), desc: t(x.d), swatch: { ...P[x.pt](...PAL[x.c]), height: '64px', borderRadius: '4px', border: '1px solid #DCCEAC' } })),
+      sentra: SENTRA.map(x => ({ name: x.name, place: t(x.place), desc: t(x.d), avatar: { ...P[x.pt](...PAL[x.c]), width: '56px', height: '56px', minWidth: '56px', borderRadius: '50%', border: '1px solid #C9B685' } }))
+    };
+  }
+}
+</script>
+</body>
+</html>
