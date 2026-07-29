@@ -566,7 +566,8 @@ function pickVoice() {
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 let speakSession = 0, pendingNext = null, narrActive = false;
-function speak(text) {
+// --- speechSynthesis TTS fallback (kept as separate function)
+function speakTTS(text) {
   if (!('speechSynthesis' in window) || muted) { narrActive = false; return; }
   speechSynthesis.cancel();
   const session = ++speakSession;
@@ -589,6 +590,64 @@ function speak(text) {
     speechSynthesis.speak(u);
   }
   next();
+}
+
+// --- audio file playback (preferred if MP3 exists)
+let audioPlayer = null;
+function playAudioForChapter(i, onended) {
+  // expected path: uploads/asal-usul-<n>.mp3 (1-based index)
+  const url = `uploads/asal-usul-${i+1}.mp3`;
+  // cleanup any previous player
+  if (audioPlayer) {
+    try { audioPlayer.pause(); audioPlayer.src = ''; } catch (e) {}
+    audioPlayer = null;
+  }
+  // try to play audio; if it errors, fallback to TTS
+  audioPlayer = new Audio(url);
+  audioPlayer.preload = 'auto';
+  audioPlayer.crossOrigin = 'anonymous';
+  audioPlayer.volume = muted ? 0 : 1.0;
+  let played = false;
+  const tidy = () => { if (audioPlayer) { audioPlayer.oncanplaythrough = null; audioPlayer.onerror = null; audioPlayer.onended = null; } };
+  audioPlayer.oncanplaythrough = () => {
+    if (!playing) return; // don't autoplay if paused
+    narrActive = true;
+    capEl.textContent = CHAPTERS[i].cap || '';
+    audioPlayer.play().catch(() => { // play failed -> fallback
+      tidy(); audioPlayer = null; playNarrationTTS(i);
+    });
+    played = true;
+  };
+  audioPlayer.onerror = () => {
+    tidy(); audioPlayer = null; playNarrationTTS(i);
+  };
+  audioPlayer.onended = () => {
+    narrActive = false;
+    tidy();
+    audioPlayer = null;
+    if (typeof onended === 'function') onended();
+  };
+  // start loading; if canplaythrough fires we'll play, otherwise onerror triggers fallback
+  audioPlayer.load();
+  // safety timeout: if not playable within 1.8s, fallback to TTS
+  setTimeout(() => {
+    if (!played && audioPlayer) {
+      // don't immediately abandon if still loading; but fallback to ensure UX
+      try { audioPlayer.pause(); } catch (e) {}
+      tidy(); audioPlayer = null; playNarrationTTS(i);
+    }
+  }, 1800);
+}
+
+function playNarrationTTS(i) {
+  const c = CHAPTERS[i];
+  speakTTS(c.nar);
+}
+
+function playNarration(i) {
+  // try audio file first, then TTS
+  if (muted) { narrActive = false; return; }
+  playAudioForChapter(i);
 }
 
 // ─────────────── playback ───────────────
@@ -621,7 +680,8 @@ function setChapter(i) {
   capEl.textContent = (muted || !('speechSynthesis' in window)) ? c.cap : '';
   tcEra.textContent = c.era;
   tcName.textContent = c.title;
-  speak(c.nar);
+  // play narration: prefer MP3 file in uploads/, fallback to speechSynthesis
+  playNarration(i);
 }
 document.getElementById('btnStart').onclick = () => {
   document.getElementById('overlayStart').style.display = 'none';
@@ -637,6 +697,9 @@ btnPlay.onclick = () => {
     if (playing) { speechSynthesis.resume(); if (pendingNext) { const f = pendingNext; pendingNext = null; f(); } }
     else speechSynthesis.pause();
   }
+  if (audioPlayer) {
+    try { playing ? audioPlayer.play() : audioPlayer.pause(); } catch (e) {}
+  }
   if (actx) playing ? actx.resume() : actx.suspend();
 };
 document.getElementById('btnReplay').onclick = () => {
@@ -650,7 +713,12 @@ btnMute.onclick = () => {
   if (muted) {
     narrActive = false;
     if ('speechSynthesis' in window) speechSynthesis.cancel();
+    if (audioPlayer) try { audioPlayer.pause(); } catch (e) {}
     if (lastChapter >= 0) capEl.textContent = CHAPTERS[lastChapter].cap;
+  }
+  else {
+    // unmuted: restore audio volume (if playing) or resume TTS where appropriate
+    if (audioPlayer) try { audioPlayer.volume = 1.0; if (playing) audioPlayer.play(); } catch (e) {}
   }
 };
 const btnFull = document.getElementById('btnFull');
